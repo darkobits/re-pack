@@ -1,0 +1,42 @@
+{
+  "name": "@darkobits/re-pack",
+  "version": "0.1.0-beta.0",
+  "author": "darkobits",
+  "license": "WTFPL",
+  "description": "Utility for managing what gets published to NPM.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/darkobits/re-pack"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "re-pack": "dist/bin/cli.js"
+  },
+  "scripts": {
+    "lint": "nps lint",
+    "test": "nps test",
+    "build": "nps build",
+    "bump": "nps bump",
+    "prepare": "nps prepare",
+    "help": "nps --scripts"
+  },
+  "dependencies": {
+    "@darkobits/chex": "^0.1.8",
+    "@darkobits/log": "^2.0.0-beta.15",
+    "@darkobits/saffron": "^0.1.12",
+    "fs-extra": "^9.0.1",
+    "tempy": "^1.0.0"
+  },
+  "devDependencies": {
+    "@darkobits/ts": "^0.1.0-beta.8",
+    "@types/fs-extra": "^9.0.4",
+    "@types/jest": "^26.0.8",
+    "@types/node": "^14.0.27",
+    "@types/ramda": "^0.27.32",
+    "@types/tar": "^4.0.3",
+    "@types/tempy": "^0.3.0",
+    "@types/uuid": "^8.3.0"
+  }
+}
