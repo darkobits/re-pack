@@ -57,7 +57,7 @@ cli.command<RePackCliOptions>({
       log.info(`Done. ${log.chalk.dim(`(${runTime})`)}`);
 
       if (!publish) {
-        log.info(`To publish your package, run ${log.chalk.bold(`npm publish ${workspaceDir}`)}`);
+        log.info(`Run ${log.chalk.bold(`\`npm publish ${workspaceDir}\` to publish.`)}`);
       }
     } catch (err) {
       log.error(err.message);
