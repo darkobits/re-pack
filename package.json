@@ -20,7 +20,6 @@
     "build": "nps build",
     "bump": "nps bump",
     "prepare": "nps prepare",
-    "postpublish": "echo 'FOO'",
     "help": "nps --scripts"
   },
   "dependencies": {
