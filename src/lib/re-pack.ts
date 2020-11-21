@@ -51,7 +51,8 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
   const resolvedSrcDir = path.resolve(opts.srcDir);
   log.verbose('srcDir', resolvedSrcDir);
 
-  const [pkg, resolvedPackDir] = await Promise.all([
+  // eslint-disable-next-line prefer-const
+  let [pkg, resolvedPackDir] = await Promise.all([
     // Gather information about the host package.
     getPkgInfo(resolvedCwd),
     // Compute the absolute path to the publish workspace, create the
@@ -67,6 +68,11 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
 
   const preparePackage = async () => {
     log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing')} ${log.chalk.green(pkg.json.name)}`);
+
+    if (opts.watch) {
+      // If in watch mode, re-read package.json to ensure we pick up changes.
+      pkg = await getPkgInfo(resolvedCwd);
+    }
 
     // Create a new package.json and write it to the publish workspace.
     await rewritePackageJson(pkg.json, resolvedSrcDir, resolvedPackDir);
