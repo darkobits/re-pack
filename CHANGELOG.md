@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.4](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2020-11-21)
+
+
+### Bug Fixes
+
+* Re-read package.json in watch mode. ([abc37be](https://github.com/darkobits/re-pack/commit/abc37bef93e8090e22837ad94738e3165ee19f48))
+
 ## [0.1.0-beta.3](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.2...v0.1.0-beta.3) (2020-11-21)
 
 
