@@ -7,34 +7,51 @@ export interface RePackOptions {
   cwd?: string;
 
   /**
-   * Sub-directory in the host package containing build artifacts to be hoisted
-   * to the package root. Usually 'dist'.
+   * Sub-directory in the host package (typically containing build artifacts) to
+   * be hoisted to the package root.
+   *
+   * Default: 'dist'
    */
-  buildDir: string;
+  srcDir?: string;
 
   /**
    * (Optional) Directory where re-pack will stage files to be published. By
    * default, a temporary directory is used.
+   *
+   * Default: .re-pack
    */
-  workspaceDir?: string;
+  packDir?: string;
 
   /**
-   * (Optional) Mapping of symlink names -> canonical file locations in the
-   * publish workspace. This will allow the user to further customize their
-   * import paths.
+   * If true, continuously watches `srcDir` and re-packs to `outDir`.
+   *
+   * Default: false
    */
-  // entries?: Array<{
-  //   from: string;
-  //   to: string;
-  // }>;
-}
+  watch?: boolean;
 
+  /**
+   * If true, runs `npm link` from within the re-pack directory.
+   *
+   * Default: false
+   */
+  link?: boolean;
 
-export interface RePackCliOptions {
-  distDir: string;
+  /**
+   * If true, runs `npm publish` after re-packing.
+   *
+   * Default: false
+   */
   publish?: boolean;
-  outDir?: string;
 }
+
+
+// export interface RePackCliOptions {
+//   cwd: string;
+//   srcDir: string;
+//   packDir: string;
+//   publish: boolean;
+//   watch: string;
+// }
 
 
 // export interface RePackConfiguration extends RePackCliOptions {

@@ -23,21 +23,24 @@
     "help": "nps --scripts"
   },
   "dependencies": {
+    "@darkobits/adeiu": "^0.2.8",
     "@darkobits/chex": "^0.1.8",
     "@darkobits/log": "^2.0.0-beta.15",
     "@darkobits/saffron": "^0.1.12",
+    "async-lock": "^1.2.4",
+    "chokidar": "^3.4.3",
     "fs-extra": "^9.0.1",
     "ramda": "^0.27.1",
     "tar": "^6.0.5",
     "tempy": "^1.0.0"
   },
   "devDependencies": {
-    "@darkobits/ts": "^0.1.0-beta.8",
+    "@darkobits/ts": "^0.1.0-beta.10",
+    "@types/async-lock": "^1.1.2",
     "@types/fs-extra": "^9.0.4",
     "@types/jest": "^26.0.8",
-    "@types/node": "^14.0.27",
+    "@types/node": "^14.14.9",
     "@types/ramda": "^0.27.32",
-    "@types/tar": "^4.0.3",
-    "@types/tempy": "^0.3.0"
+    "@types/tar": "^4.0.4"
   }
 }

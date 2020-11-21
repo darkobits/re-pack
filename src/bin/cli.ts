@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
+import adeiu from '@darkobits/adeiu';
 import cli from '@darkobits/saffron';
 
-import {
-  RePackCliOptions
-} from 'etc/types';
+import { DEFAULT_OPTIONS } from 'etc/constants';
+import { RePackOptions } from 'etc/types';
 import log from 'lib/log';
 import rePack from 'lib/re-pack';
 
 
-cli.command<RePackCliOptions>({
+cli.command<Required<RePackOptions>>({
   command: '* [cwd]',
   config: {
     fileName: 're-pack',
@@ -17,47 +17,72 @@ cli.command<RePackCliOptions>({
   },
   builder: ({ command }) => {
     command.positional('cwd', {
-      description: 'Directory containing the NPM package to run re-pack on.',
+      description: 'Root directory of the NPM package to re-pack.',
       type: 'string',
-      default: 'process.cwd()'
+      required: false,
+      default: DEFAULT_OPTIONS.cwd
+    });
+
+    command.option('src-dir', {
+      description: 'Directory (typically containing build artifacts) to hoist to the package root.',
+      type: 'string',
+      required: false,
+      default: DEFAULT_OPTIONS.srcDir
+    });
+
+    command.option('pack-dir', {
+      description: 'Directory where the package will be re-packed.',
+      type: 'string',
+      default: DEFAULT_OPTIONS.packDir
     });
 
     command.option('publish', {
       description: 'Whether to run "npm publish" after re-pack has run.',
       type: 'boolean',
-      default: false,
-      required: false
+      required: false,
+      default: DEFAULT_OPTIONS.publish,
     });
 
-    command.option('dist-dir', {
-      description: 'Directory containing build artifacts to hoist.',
-      type: 'string',
-      default: 'dist',
-      required: false
+    command.option('watch', {
+      description: 'If true, continuously watches dist-dir and re-packs to out-dir.',
+      type: 'boolean',
+      required: false,
+      default: DEFAULT_OPTIONS.watch,
     });
 
-    command.option('out-dir', {
-      description: 'Directory where re-pack will stage the host package.',
-      type: 'string',
-      default: '.re-pack'
+    command.option('link', {
+      description: 'If true, runs `npm link` from the re-pack directory.',
+      type: 'boolean',
+      required: false,
+      default: DEFAULT_OPTIONS.link,
     });
   },
   handler: async ({ argv, config }) => {
     try {
       const runTime = log.createTimer();
 
-      // Not implemented yet.
-      const publish = config?.publish ?? argv.publish;
+      // Not implemented yet. Will need to remove defaults above so that args
+      // will take precedence over config, then swap logic below.
+      const publish = argv?.publish ?? config?.publish;
 
-      const workspaceDir = await rePack({
-        buildDir: argv.distDir,
-        workspaceDir: argv.outDir
+      adeiu(signal => {
+        if (argv.watch) {
+          log.info(`Got signal ${log.chalk.yellow(signal)}; closing watcher.`);
+        }
       });
 
-      log.info(`Done. ${log.chalk.dim(`(${runTime})`)}`);
+      const outDir = await rePack({
+        cwd: argv.cwd,
+        srcDir: argv.srcDir,
+        packDir: argv.packDir,
+        publish: argv.publish,
+        watch: argv.watch,
+        link: argv.link
+      });
 
-      if (!publish) {
-        log.info(`Run ${log.chalk.bold(`\`npm publish ${workspaceDir}\` to publish.`)}`);
+      if (publish) {
+        log.info(`Done. ${log.chalk.dim(`(${runTime})`)}`);
+        log.info(`Run ${log.chalk.bold(`\`npm publish ${outDir} --ignore-scripts \` to publish.`)}`);
       }
     } catch (err) {
       log.error(err.message);

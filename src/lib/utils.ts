@@ -1,6 +1,5 @@
 import path from 'path';
 
-import chex from '@darkobits/chex';
 import fs from 'fs-extra';
 import ow from 'ow';
 import * as R from 'ramda';
@@ -10,6 +9,7 @@ import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
+import npm from 'lib/npm';
 
 
 /**
@@ -145,8 +145,7 @@ export async function rewritePackageJson(pkgJson: NormalizedPackageJson, pkgHois
  *
  * Note: This function assumes the publish workspace has already been created.
  */
-export async function packToPublishWorkspace(pkgRoot: string, publishWorkspace: string) {
-  const npm = await chex('npm >=5');
+export async function packToPublishDir(pkgRoot: string, publishWorkspace: string) {
   const { stdout: tarballPath } = await npm(['pack', '--ignore-scripts'], { cwd: pkgRoot });
 
   // Extract tarball contents to publish directory. We use stripComponents=1
@@ -172,19 +171,19 @@ export async function packToPublishWorkspace(pkgRoot: string, publishWorkspace: 
  * Note. This function assumes that package artifacts have already been unpacked
  * into the publish workspace.
  */
-export async function hoistBuildDir(publishWorkspace: string, publishDir: string) {
+export async function hoistSrcDir(publishWorkspace: string, publishDir: string) {
   try {
     const absPublishDir = path.resolve(publishWorkspace, publishDir);
     const publishDirStats = await fs.stat(absPublishDir);
 
     if (!publishDirStats.isDirectory) {
-      throw new Error(`${log.prefix('hoistBuildDir')} "${log.chalk.green(publishDir)}" is not a directory.`);
+      throw new Error(`${log.prefix('hoistSrcDir')} "${log.chalk.green(publishDir)}" is not a directory.`);
     }
 
     // Get a list of all files in the publish workspace that will need to be
     // hoisted.
     const filesInPublishWorkspace = await fs.readdir(path.resolve(publishWorkspace, publishDir));
-    log.verbose(log.prefix('hoistBuildDir'), 'Files in build directory to be hoisted:', filesInPublishWorkspace);
+    log.verbose(log.prefix('hoistSrcDir'), 'Files in build directory to be hoisted:', filesInPublishWorkspace);
 
     // Move each file/folder up from the output directory to the publish
     // workspace.
@@ -193,8 +192,9 @@ export async function hoistBuildDir(publishWorkspace: string, publishDir: string
       const to = path.resolve(publishWorkspace, fileInPublishWorkspace);
 
       try {
-        await fs.move(from, to, { overwrite: false });
-        log.verbose(log.prefix('hoistBuildDir'), `Moved file ${log.chalk.green(from)} => ${log.chalk.green(to)}.`);
+        // Switched to true to support watch move
+        await fs.move(from, to, { overwrite: true });
+        log.verbose(log.prefix('hoistSrcDir'), `Moved file ${log.chalk.green(from)} => ${log.chalk.green(to)}.`);
       } catch (err) {
         throw new Error(`Unable to move file ${log.chalk.green(from)} to ${log.chalk.green(to)}: ${err.message}`);
       }
@@ -202,21 +202,23 @@ export async function hoistBuildDir(publishWorkspace: string, publishDir: string
 
     // Remove the (hopefully empty) `publishDir` directory now that all files
     // and folders therein have been hoisted.
-    log.silly(log.prefix('hoistBuildDir'), `Removing build directory ${log.chalk.green(absPublishDir)}`);
+    log.silly(log.prefix('hoistSrcDir'), `Removing build directory ${log.chalk.green(absPublishDir)}`);
     await fs.rmdir(absPublishDir);
-    log.verbose(log.prefix('hoistBuildDir'), `Hoisted files from ${log.chalk.green(absPublishDir)} to publish root.`);
+    log.verbose(log.prefix('hoistSrcDir'), `Hoisted files from ${log.chalk.green(absPublishDir)} to publish root.`);
   } catch (err) {
-    throw new Error(`${log.prefix('hoistBuildDir')} Error hoisting file/directory: ${err.message}`);
+    throw new Error(`${log.prefix('hoistSrcDir')} Error hoisting file/directory: ${err.message}`);
   }
 }
 
 
 /**
+ * @deprecated - NPM does not support publishing symlinks.
+ *
  * Provided the path to a publish workspace and a map of symlinks to create,
  * creates each symlink.
  *
  * Note: This function assumes that the "hoisting" phase has already been
- * completed
+ * completed.
  */
 export async function symlinkEntries(publishWorkspace: string, entries: Array<{from: string; to: string}>) {
   try {
@@ -237,11 +239,13 @@ export async function symlinkEntries(publishWorkspace: string, entries: Array<{f
  * be published from the publish workspace.
  */
 export async function packDryRun(cwd: string) {
-  const npm = await chex('npm >=5');
-
   await npm(['pack', '--dry-run', '--ignore-scripts'], {
     cwd,
     stdout: 'ignore',
-    stderr: 'inherit'
+
+    stderr: 'inherit',
+    env: {
+      FORCE_COLOR: '3'
+    }
   });
 }
