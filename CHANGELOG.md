@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.3](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.2...v0.1.0-beta.3) (2020-11-21)
+
+
+### Features
+
+* Add --publish flag, run lifecycle scripts. ([e0147d8](https://github.com/darkobits/re-pack/commit/e0147d8e7c4b1e99171f6b1b3944cb8f142b58a9))
+* Add --watch and --link options. ([d1172d2](https://github.com/darkobits/re-pack/commit/d1172d27059dd3dc5a59225835caf51d2032cd82))
+
 ## [0.1.0-beta.2](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.1...v0.1.0-beta.2) (2020-11-17)
 
 
