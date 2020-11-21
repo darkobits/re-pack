@@ -8,14 +8,18 @@ import * as R from 'ramda';
 import { DEFAULT_OPTIONS } from 'etc/constants';
 import { RePackOptions } from 'etc/types';
 import log from 'lib/log';
-import npm from 'lib/npm';
+import {
+  linkPackage,
+  runLifecycleScript,
+  publishPackage
+} from 'lib/npm';
 import {
   createPublishWorkspace,
   getPkgInfo,
   hoistSrcDir,
   packToPublishDir,
   rewritePackageJson,
-  packDryRun
+  inferPublishTag
 } from 'lib/utils';
 
 
@@ -26,6 +30,8 @@ import {
  * provided configuration.
  */
 export default async function rePack(userOptions: Required<RePackOptions>) {
+  const runTime = log.createTimer();
+
   // Merge options with defaults.
   const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]);
 
@@ -60,7 +66,7 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
   let hasLinkedPackage = false;
 
   const preparePackage = async () => {
-    log.info(log.prefix('pack'), `Re-packing ${log.chalk.green(pkg.json.name)}`);
+    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing')} ${log.chalk.green(pkg.json.name)}`);
 
     // Create a new package.json and write it to the publish workspace.
     await rewritePackageJson(pkg.json, resolvedSrcDir, resolvedPackDir);
@@ -73,31 +79,26 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
     // it.
     await hoistSrcDir(resolvedPackDir, opts.srcDir);
 
-    log.info(log.prefix('pack'), 'Done.');
+    if (opts.watch || opts.link) {
+      log.info(log.prefix('pack'), log.chalk.bold('Done.'));
+    }
 
     // Once the package is re-packed, perform a one-time `npm link` if the user
     // passed the --link option.
     if (opts.link && !hasLinkedPackage) {
-      console.log('');
-      log.info(log.prefix('link'), log.chalk.bold('Linking package...'));
-      console.log('');
-
-      await npm(['link', '--ignore-scripts'], {
-        cwd: resolvedPackDir,
-        stdio: 'inherit'
-      });
-
-      console.log('');
-      log.info(log.prefix('link'), log.chalk.bold('Done.'));
-      console.log('');
-
+      await linkPackage(resolvedPackDir);
+      // eslint-disable-next-line require-atomic-updates
       hasLinkedPackage = true;
+      return;
     }
 
+    // If the user passed the --publish option, publish the package.
     if (opts.publish) {
-      // Run a --dry-run of `npm pack` from the publish workspace so the user can
-      // verify package contents.
-      await packDryRun(resolvedPackDir);
+      await publishPackage({
+        cwd: resolvedPackDir,
+        dryRun: opts.dryRun,
+        tag: inferPublishTag(pkg.json.version)
+      });
     }
   };
 
@@ -125,13 +126,13 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
       interval: 250
     });
 
-    watcher.on('ready', async () => {
+    watcher.on('ready', () => {
       log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedSrcDir)}`);
     });
 
     watcher.on('all', (event, changed) => {
       log.info(log.prefix('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`);
-      lock.acquire('re-pack', preparePackage);
+      void lock.acquire('re-pack', preparePackage);
     });
   }
 
@@ -141,35 +142,58 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
   if (opts.publish) {
     log.info(`Preparing package: ${log.chalk.green(pkg.json.name)}`);
 
+    // Run prepublishOnly script.
     if (pkg.json.scripts?.prepublishOnly) {
-      log.info(log.prefix('lifecycle'), 'Should run prepublishOnly here.');
+      await runLifecycleScript({
+        cwd: pkg.rootDir,
+        scriptName: 'prepublishOnly'
+      });
     }
 
+    // Run prepare script.
     if (pkg.json.scripts?.prepare) {
-      log.info(log.prefix('lifecycle'), 'Should run prepublish here.');
+      await runLifecycleScript({
+        cwd: pkg.rootDir,
+        scriptName: 'prepare'
+      });
     }
 
-    // Prepare package.
+    // Re-pack & publish package.
     await preparePackage();
 
-    // TODO: Perform tag detection to apply --tag option.
-    log.info(log.prefix('publish'), 'Should run publish --ignore-scripts.');
-
+    // Run postpublish script.
     if (pkg.json.scripts?.postpublish) {
-      log.info(log.prefix('lifecycle'), 'Should run postpublish here.');
+      await runLifecycleScript({
+        cwd: pkg.rootDir,
+        scriptName: 'postpublish'
+      });
     }
+  }
+
+
+  // ----- Re-Pack Only --------------------------------------------------------
+
+  if (!opts.watch && !opts.publish) {
+    await preparePackage();
   }
 
 
   // ----- Compute Return Value ------------------------------------------------
 
-  if (opts.watch) {
-    return new Promise(resolve => {
-      adeiu(() => {
-        watcher.close().then(resolve);
+  return new Promise<string>(resolve => {
+    // If using --watch, set up a POSIX handler that will close our watchers,
+    // then exit.
+    if (opts.watch) {
+      adeiu(async () => {
+        await watcher.close();
+        resolve(resolvedPackDir);
       });
-    })
-  }
 
-  return resolvedPackDir;
+      return;
+    }
+
+    // Otherwise, log the total run time.
+    log.info(log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));
+    resolve(resolvedPackDir);
+  });
 }

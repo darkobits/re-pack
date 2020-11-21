@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import ow from 'ow';
 import * as R from 'ramda';
 import readPkgUp, { NormalizedPackageJson } from 'read-pkg-up';
+import semver from 'semver';
 import tar from 'tar';
 import tempy from 'tempy';
 
@@ -35,9 +36,8 @@ export interface PkgInfo {
   rootDir: string;
 }
 
+
 /**
- * @private
- *
  * Reads the package.json for the host package by walking up the directory tree
  * from the current working directory. An optional `cwd` param may be provided
  * to override the default.
@@ -61,8 +61,6 @@ export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> 
 
 
 /**
- * @private
- *
  * Creates the temporary publish workspace in the host package's root and
  * ensures it is empty.
  */
@@ -90,8 +88,6 @@ export async function createPublishWorkspace(workspacePath?: string) {
 
 
 /**
- * @private
- *
  * Modifies and writes to the publish workspace a new package.json with correct
  * paths based on the files hoisted from `pkgHoistDir`.
  *
@@ -212,6 +208,27 @@ export async function hoistSrcDir(publishWorkspace: string, publishDir: string) 
 
 
 /**
+ * Provided a valid semver string, determines if it contains a prerelease
+ * component (ex: 'beta') and returns it.
+ */
+export function inferPublishTag(packageVersion: string) {
+  const parsed = semver.parse(packageVersion, { includePrerelease: true });
+
+  if (!parsed) {
+    return;
+  }
+
+  if (parsed.prerelease.length > 0) {
+    const prereleaseTag = parsed.prerelease[0];
+
+    if (typeof prereleaseTag === 'string') {
+      return prereleaseTag;
+    }
+  }
+}
+
+
+/**
  * @deprecated - NPM does not support publishing symlinks.
  *
  * Provided the path to a publish workspace and a map of symlinks to create,
@@ -230,22 +247,4 @@ export async function symlinkEntries(publishWorkspace: string, entries: Array<{f
   } catch (err) {
     throw new Error(`${log.prefix('symlinkEntries')} Error creating symlink: ${err.message}`);
   }
-}
-
-
-/**
- * Performs a dry run of `npm pack` in the provided root directory and prints
- * the output. Used as a debugging feature to let users introspect what will
- * be published from the publish workspace.
- */
-export async function packDryRun(cwd: string) {
-  await npm(['pack', '--dry-run', '--ignore-scripts'], {
-    cwd,
-    stdout: 'ignore',
-
-    stderr: 'inherit',
-    env: {
-      FORCE_COLOR: '3'
-    }
-  });
 }

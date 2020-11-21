@@ -40,30 +40,35 @@ cli.command<Required<RePackOptions>>({
       description: 'Whether to run "npm publish" after re-pack has run.',
       type: 'boolean',
       required: false,
-      default: DEFAULT_OPTIONS.publish,
+      default: DEFAULT_OPTIONS.publish
+    });
+
+    command.option('dry-run', {
+      description: 'Whether to pass --dry-run to `npm publish`.',
+      type: 'boolean',
+      required: false,
+      default: DEFAULT_OPTIONS.dryRun
     });
 
     command.option('watch', {
       description: 'If true, continuously watches dist-dir and re-packs to out-dir.',
       type: 'boolean',
       required: false,
-      default: DEFAULT_OPTIONS.watch,
+      default: DEFAULT_OPTIONS.watch
     });
 
     command.option('link', {
       description: 'If true, runs `npm link` from the re-pack directory.',
       type: 'boolean',
       required: false,
-      default: DEFAULT_OPTIONS.link,
+      default: DEFAULT_OPTIONS.link
     });
   },
-  handler: async ({ argv, config }) => {
+  handler: async ({ argv }) => {
     try {
-      const runTime = log.createTimer();
-
       // Not implemented yet. Will need to remove defaults above so that args
       // will take precedence over config, then swap logic below.
-      const publish = argv?.publish ?? config?.publish;
+      // const publish = argv?.publish ?? config?.publish;
 
       adeiu(signal => {
         if (argv.watch) {
@@ -71,19 +76,7 @@ cli.command<Required<RePackOptions>>({
         }
       });
 
-      const outDir = await rePack({
-        cwd: argv.cwd,
-        srcDir: argv.srcDir,
-        packDir: argv.packDir,
-        publish: argv.publish,
-        watch: argv.watch,
-        link: argv.link
-      });
-
-      if (publish) {
-        log.info(`Done. ${log.chalk.dim(`(${runTime})`)}`);
-        log.info(`Run ${log.chalk.bold(`\`npm publish ${outDir} --ignore-scripts \` to publish.`)}`);
-      }
+      await rePack(argv);
     } catch (err) {
       log.error(err.message);
       log.verbose(err.stack.split('\n').slice(1).join('\n'));

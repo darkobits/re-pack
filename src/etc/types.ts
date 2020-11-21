@@ -42,6 +42,13 @@ export interface RePackOptions {
    * Default: false
    */
   publish?: boolean;
+
+  /**
+   * When used in conjunction with the --publish argument, performs a dry run.
+   *
+   * Default: false
+   */
+  dryRun?: boolean;
 }
 
 

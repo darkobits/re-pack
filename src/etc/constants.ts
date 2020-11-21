@@ -21,5 +21,6 @@ export const DEFAULT_OPTIONS: Required<RePackOptions> = {
   packDir: '.re-pack',
   publish: false,
   watch: false,
-  link: false
+  link: false,
+  dryRun: false
 };
