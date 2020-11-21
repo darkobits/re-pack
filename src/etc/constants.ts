@@ -6,12 +6,13 @@ import { RePackOptions } from 'etc/types';
  */
 export const REWRITE_FIELDS = [
   'bin',
-  'directories',
-  'main',
   'browser',
-  'module',
+  'directories',
+  'exports',
+  'files',
+  'main',
   'man',
-  'files'
+  'module'
 ];
 
 
