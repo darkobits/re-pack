@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.4...v0.1.0) (2020-11-22)
+
+
+### Features
+
+* Make 'publish' its own command. ([cc92098](https://github.com/darkobits/re-pack/commit/cc920980c8ac28d4c2279daf56b6943b45700d7f))
+
 ## [0.1.0-beta.4](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2020-11-21)
 
 
