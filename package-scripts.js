@@ -1,9 +1,9 @@
 module.exports = require('@darkobits/ts').nps(() => ({
   scripts: {
     repack: {
-      script: 're-pack',
+      script: './dist/bin/cli.js',
       watch: {
-        script: 're-pack --watch --link'
+        script: './dist/bin/cli.js --watch --link'
       }
     }
   }
