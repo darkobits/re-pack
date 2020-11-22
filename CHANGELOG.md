@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/darkobits/re-pack/compare/v0.1.2...v0.1.3) (2020-11-22)
+
+
+### Bug Fixes
+
+* Do not copy package.json with packlist. ([80251de](https://github.com/darkobits/re-pack/commit/80251defe1eb1b694b85c3de4f185386fdef18c4))
+
 ### [0.1.2](https://github.com/darkobits/re-pack/compare/v0.1.1...v0.1.2) (2020-11-22)
 
 ### [0.1.1](https://github.com/darkobits/re-pack/compare/v0.1.0...v0.1.1) (2020-11-22)
