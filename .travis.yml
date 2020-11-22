@@ -4,5 +4,9 @@ node_js: 12
 install: npm ci --ignore-scripts
 script:
   - npx nps prepare
+  # Poor-man's smoke testing.
+  - npm link
+  - re-pack
+  - re-pack publish --dry-run
 # after_success:
 #   - npx codacy-coverage -v < ./coverage/lcov.info
