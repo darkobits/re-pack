@@ -5,9 +5,6 @@ module.exports = require('@darkobits/ts').nps(() => ({
       watch: {
         script: 're-pack --watch --link'
       }
-    },
-    publish: {
-      script: 're-pack --publish'
     }
   }
 }));
