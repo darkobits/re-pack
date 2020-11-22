@@ -17,6 +17,7 @@ export const REWRITE_FIELDS = [
 
 
 export const DEFAULT_OPTIONS: RePackArguments = {
+  cwd: process.cwd(),
   hoistDir: 'dist',
   packDir: '.re-pack',
   watch: false,
@@ -25,7 +26,8 @@ export const DEFAULT_OPTIONS: RePackArguments = {
 
 
 export const DEFAULT_PUBLISH_OPTIONS: PublishArguments = {
-  hoistDir: 'dist',
-  packDir: '.re-pack',
+  cwd: DEFAULT_OPTIONS.cwd,
+  hoistDir: DEFAULT_OPTIONS.hoistDir,
+  packDir: DEFAULT_OPTIONS.packDir,
   dryRun: false
 };
