@@ -25,6 +25,7 @@ import rePack from 'lib/re-pack';
 export default async function publish(userOptions: PublishArguments) {
   try {
     const runTime = log.createTimer();
+    config.set('isPublishing', true);
 
     // Merge options with defaults.
     const opts = R.mergeAll([DEFAULT_PUBLISH_OPTIONS, userOptions]) as Required<PublishArguments>;
@@ -35,61 +36,48 @@ export default async function publish(userOptions: PublishArguments) {
 
     // Get package information.
     const pkg = await getPkgInfo(resolvedCwd);
+    log.info(log.prefix('publish'), `Preparing to publish package: ${log.chalk.green(`${pkg.json.name}@${pkg.json.version}`)}`);
+
+    // Compute dist-tag.
     const tag = opts.tag ?? inferPublishTag(pkg.json.version);
 
+    if (tag) {
+      log.info(log.prefix('publish'), `Using dist-tag: ${log.chalk.yellow(tag)}`);
+    }
 
-    log.info(log.prefix('publish'), `Preparing to publish package: ${log.chalk.green(pkg.json.name)}`);
-    log.info(log.prefix('publish'), `Using dist-tag ${tag}`);
-
-    config.set('isPublishing', true);
-    config.set('hasSeenPrepublishWarning', false);
-
-    // Run prepublishOnly script on _root_ package.
+    // Run the "prepublishOnly" script on the _root_ package.
     if (pkg.json.scripts?.prepublishOnly) {
-      log.info(log.prefix('publish'), `Running ${log.chalk.green('"prepublishOnly"')} lifecycle script.`);
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'prepublishOnly'
-      });
+      log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"prepublishOnly"')} lifecycle script.`);
+      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'prepublishOnly' });
     } else if (!config.get('hasSeenPrepublishWarning')) {
-      log.warn(log.prefix('publish'), `Consider adding a ${log.chalk.green('"prepublishOnly"')} package script that runs ${log.chalk.bold('re-pack check')}.`);
+      // Issue a one-time warning about installing the publish guard.
+      log.warn(log.prefix('publish'), `Consider adding a ${log.chalk.green('"prepublishOnly"')} package script that runs ${log.chalk.bold('re-pack guard')}.`);
       log.warn(log.prefix('publish'), log.chalk.gray('This warning will not be displayed again.'));
       config.set('hasSeenPrepublishWarning', true);
     }
 
-    // Run prepare script on _root_ package.
+    // Run the "prepare" script on the _root_ package.
     if (pkg.json.scripts?.prepare) {
-      log.info(log.prefix('publish'), `Running ${log.chalk.green('"prepare"')} lifecycle script.`);
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'prepare'
-      });
+      log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"prepare"')} lifecycle script.`);
+      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'prepare' });
     }
 
     // Re-pack package.
     await rePack({
       cwd: opts.cwd,
+      // N.B. We want to pass the plain hoistDir here, not the resolved one, as
+      // this function will be working with relative paths within the package.
       hoistDir: opts.hoistDir,
-      packDir: opts.packDir,
-      watch: false,
-      link: false
+      packDir: opts.packDir
     });
 
     // Publish re-packed package.
-    await publishPackage({
-      pkgRoot: opts.packDir,
-      dryRun: opts.dryRun,
-      // TODO: Support custom --tag option.
-      tag: inferPublishTag(pkg.json.version)
-    });
+    await publishPackage({ cwd: opts.packDir, dryRun: opts.dryRun, tag });
 
-    // Run postpublish script.
+    // Run the "postpublish" script on the _root_ package.
     if (pkg.json.scripts?.postpublish) {
-      log.info(log.prefix('publish'), `Running ${log.chalk.green('"postpublish"')} lifecycle script.`);
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'postpublish'
-      });
+      log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"postpublish"')} lifecycle script.`);
+      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'postpublish' });
     }
 
     log.info(log.prefix('publish'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));

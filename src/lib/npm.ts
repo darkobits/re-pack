@@ -106,7 +106,7 @@ export async function runLifecycleScript(opts: RunLifecycleScriptOptions) {
 // ----- Publish ---------------------------------------------------------------
 
 export interface PublishOptions {
-  pkgRoot: string;
+  cwd: string;
   dryRun?: boolean;
   tag?: string;
 }
@@ -119,24 +119,18 @@ export interface PublishOptions {
  * the re-pack workspace, and re-pack explicitly runs lifecycle scripts from the
  * package root.
  */
-export async function publishPackage(opts: PublishOptions) {
+export async function publishPackage({ cwd, tag, dryRun }: PublishOptions) {
   const args = ['publish', '--ignore-scripts'];
 
-  if (opts.dryRun) {
+  if (dryRun) {
     args.push('--dry-run');
   }
 
-  if (opts.tag) {
-    args.push(`--tag=${opts.tag}`);
+  if (tag) {
+    args.push(`--tag=${tag}`);
   }
 
   log.verbose(log.prefix('publishPackage'), `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`);
 
-  await npm(args, {
-    cwd: opts.pkgRoot,
-    stdio: 'inherit',
-    env: {
-      // FORCE_COLOR: '3'
-    }
-  });
+  await npm(args, { cwd, stdio: 'inherit' });
 }
