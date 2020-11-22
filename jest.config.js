@@ -1,4 +1,4 @@
-module.exports = require('@darkobits/ts/jest')({
+module.exports = require('@darkobits/ts').jest({
   coveragePathIgnorePatterns: [
     '<rootDir>/src/bin',
     '<rootDir>/src/config',

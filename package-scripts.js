@@ -1,4 +1,4 @@
-module.exports = require('@darkobits/ts/package-scripts')(({ npsUtils }) => ({
+module.exports = require('@darkobits/ts').nps(() => ({
   scripts: {
     repack: {
       script: 're-pack',
