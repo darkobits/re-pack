@@ -150,6 +150,11 @@ export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPub
   const srcFiles: Array<string> = await getPackList(pkgRoot);
 
   await Promise.all(srcFiles.map(async srcFile => {
+    // Skip package.json, as we re-write it manually elsewhere.
+    if (path.basename(srcFile) === 'package.json') {
+      return;
+    }
+
     const resolvedSrcFile = path.resolve(pkgRoot, srcFile);
     const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''));
     log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`);

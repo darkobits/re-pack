@@ -33,11 +33,10 @@ export default async function rePack(userOptions: RePackArguments) {
 
   // Compute the absolute path to our working directory.
   const resolvedCwd = path.resolve(opts.cwd);
-  log.verbose('cwd', resolvedCwd);
+  log.verbose(log.prefix('pack'), `cwd: ${log.chalk.green(resolvedCwd)}`);
 
   // Compute the absolute path to our source directory.
   const resolvedHoistDir = path.resolve(opts.hoistDir);
-  log.verbose('hoistDir', resolvedHoistDir);
 
   // eslint-disable-next-line prefer-const
   let [pkg, resolvedPackDir] = await Promise.all([
@@ -64,7 +63,7 @@ export default async function rePack(userOptions: RePackArguments) {
     // Create a new package.json and write it to the publish workspace.
     await rewritePackageJson({
       pkgJson: pkg.json,
-      hoistDir: resolvedHoistDir,
+      hoistDir: opts.hoistDir,
       packDir: resolvedPackDir
     });
 
