@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/darkobits/re-pack/compare/v0.1.0...v0.1.1) (2020-11-22)
+
+
+### Bug Fixes
+
+* Re-add default cwd. ([25a4177](https://github.com/darkobits/re-pack/commit/25a41777b9ae2a7dcea475d4b50f038b270f1bdf))
+
 ## [0.1.0](https://github.com/darkobits/re-pack/compare/v0.1.0-beta.4...v0.1.0) (2020-11-22)
 
 
