@@ -3,14 +3,13 @@ import path from 'path';
 import fs from 'fs-extra';
 import ow from 'ow';
 import * as R from 'ramda';
-import readPkgUp, { NormalizedPackageJson } from 'read-pkg-up';
+import { NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
-import tar from 'tar';
 import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
-import npm from 'lib/npm';
+import { getPackList } from 'lib/npm';
 
 
 /**
@@ -31,71 +30,60 @@ export function isEmpty(value: any) {
 }
 
 
-export interface PkgInfo {
-  json: NormalizedPackageJson;
-  rootDir: string;
-}
-
-
 /**
- * Reads the package.json for the host package by walking up the directory tree
- * from the current working directory. An optional `cwd` param may be provided
- * to override the default.
+ * Creates the directory to which the host package will be re-packed.
  */
-export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> {
-  const pkgInfo = await readPkgUp({ cwd });
+export async function createPackDir(workspacePath?: string) {
+  const resolvedPackDir = workspacePath ? path.resolve(workspacePath) : tempy.directory();
 
-  if (!pkgInfo) {
-    throw new Error(`log.prefix('getPkgInfo') Unable to locate package root from: ${log.chalk.green(cwd)}`);
-  }
-
-  // Compute package root directory.
-  const pkgRootDir = path.dirname(pkgInfo.path);
-  const pkgJson = pkgInfo.packageJson;
-
-  return {
-    json: pkgJson,
-    rootDir: pkgRootDir
-  };
-}
-
-
-/**
- * Creates the temporary publish workspace in the host package's root and
- * ensures it is empty.
- */
-export async function createPublishWorkspace(workspacePath?: string) {
-  const computedPath = workspacePath ?? tempy.directory();
-
-  // Ensure publish directory exists, creating any directories as-needed.
+  // Ensure re-pack directory exists, creating any directories as-needed.
   try {
-    await fs.ensureDir(computedPath);
+    await fs.ensureDir(resolvedPackDir);
   } catch (err) {
-    throw new Error(`${log.prefix('createPublishWorkspace')} Unable to create publish workspace directory: ${err.message}`);
+    err.message = `${log.prefix('createPackDir')} Unable to create re-pack directory: ${err.message}`;
+    throw err;
   }
 
-  // Ensure the workspace is empty.
+  // Ensure the re-pack directory is empty, deleting files as needed.
   try {
-    await fs.emptyDir(computedPath);
+    await fs.emptyDir(resolvedPackDir);
   } catch (err) {
-    throw new Error(`${log.prefix('createPublishWorkspace')} Unable to ensure publish workspace is empty: ${err.message}`);
+    err.message = `${log.prefix('createPackDir')} Unable to ensure publish workspace is empty: ${err.message}`;
+    throw err;
   }
 
-  log.verbose(log.prefix('createPublishWorkspace'), `Created publish workspace at: ${log.chalk.green(computedPath)}`);
+  log.verbose(log.prefix('createPackDir'), `Created re-pack directory: ${log.chalk.green(resolvedPackDir)}`);
 
-  return computedPath;
+  return resolvedPackDir;
 }
 
 
 /**
  * Modifies and writes to the publish workspace a new package.json with correct
- * paths based on the files hoisted from `pkgHoistDir`.
+ * paths based on the files hoisted from `hoistDir`.
  *
  * Note. This function assumes the publish workspace has already been created
  * and can be written to.
  */
-export async function rewritePackageJson(pkgJson: NormalizedPackageJson, pkgHoistDir: string, publishWorkspace: string) {
-  const rewriteField = (value: string) => path.relative(pkgHoistDir, value);
+export interface RewritePackageJsonOptions {
+  /**
+   * Normalized package json data to re-write.
+   */
+  pkgJson: NormalizedPackageJson;
+
+  /**
+   * Directory the the project to be hoisted to root. Used to determine how to
+   * re-write paths in package.json.
+   */
+  hoistDir: string;
+
+  /**
+   * Directory to which re-written package.json will be written.
+   */
+  packDir: string;
+}
+export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: RewritePackageJsonOptions) {
+  const rewriteField = (value: string) => path.relative(hoistDir, value);
 
   try {
     const newPkgJson = R.reduce((acc, curField) => {
@@ -127,7 +115,7 @@ export async function rewritePackageJson(pkgJson: NormalizedPackageJson, pkgHois
     }, pkgJson, REWRITE_FIELDS);
 
     // Write the new package.json to the publish workspace.
-    await fs.writeJson(path.resolve(publishWorkspace, 'package.json'), newPkgJson, { spaces: 2 });
+    await fs.writeJson(path.resolve(packDir, 'package.json'), newPkgJson, { spaces: 2 });
     log.verbose(log.prefix('rewritePackageJson'), `Wrote ${log.chalk.green('package.json')} to publish workspace.`);
   } catch (err) {
     throw new Error(`${log.prefix('rewritePackageJson')} Error re-writing package.json: ${err.message}`);
@@ -141,69 +129,32 @@ export async function rewritePackageJson(pkgJson: NormalizedPackageJson, pkgHois
  *
  * Note: This function assumes the publish workspace has already been created.
  */
-export async function packToPublishDir(pkgRoot: string, publishWorkspace: string) {
-  const { stdout: tarballPath } = await npm(['pack', '--ignore-scripts'], { cwd: pkgRoot });
+export interface PackToPublishDirOptions {
+  /**
+   * Root directory of the NPM package to re-pack.
+   */
+  pkgRoot: string;
 
-  // Extract tarball contents to publish directory. We use stripComponents=1
-  // here because NPM puts all tarball contents under a 'package' directory
-  // inside the tarball.
-  await tar.extract({
-    file: tarballPath,
-    cwd: publishWorkspace,
-    strip: 1,
-    // Skip extracting package.json into the publish workspace because we will
-    // write our own.
-    filter: (filePath: string) => !filePath.includes('package.json')
-  });
+  /**
+   * Directory from which to hoist files to the root of the destination
+   * directory.
+   */
+  hoistDir: string;
 
-  // Remove the tarball.
-  await fs.remove(tarballPath);
+  /**
+   * Directory to write files to.
+   */
+  destDir: string;
 }
+export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPublishDirOptions) {
+  const srcFiles: Array<string> = await getPackList(pkgRoot);
 
-
-/**
- * Moves all files in `publishDir` to the publish workspace.
- *
- * Note. This function assumes that package artifacts have already been unpacked
- * into the publish workspace.
- */
-export async function hoistSrcDir(publishWorkspace: string, publishDir: string) {
-  try {
-    const absPublishDir = path.resolve(publishWorkspace, publishDir);
-    const publishDirStats = await fs.stat(absPublishDir);
-
-    if (!publishDirStats.isDirectory) {
-      throw new Error(`${log.prefix('hoistSrcDir')} "${log.chalk.green(publishDir)}" is not a directory.`);
-    }
-
-    // Get a list of all files in the publish workspace that will need to be
-    // hoisted.
-    const filesInPublishWorkspace = await fs.readdir(path.resolve(publishWorkspace, publishDir));
-    log.verbose(log.prefix('hoistSrcDir'), 'Files in build directory to be hoisted:', filesInPublishWorkspace);
-
-    // Move each file/folder up from the output directory to the publish
-    // workspace.
-    await Promise.all(filesInPublishWorkspace.map(async fileInPublishWorkspace => {
-      const from = path.resolve(publishWorkspace, publishDir, fileInPublishWorkspace);
-      const to = path.resolve(publishWorkspace, fileInPublishWorkspace);
-
-      try {
-        // Switched to true to support watch move
-        await fs.move(from, to, { overwrite: true });
-        log.verbose(log.prefix('hoistSrcDir'), `Moved file ${log.chalk.green(from)} => ${log.chalk.green(to)}.`);
-      } catch (err) {
-        throw new Error(`Unable to move file ${log.chalk.green(from)} to ${log.chalk.green(to)}: ${err.message}`);
-      }
-    }));
-
-    // Remove the (hopefully empty) `publishDir` directory now that all files
-    // and folders therein have been hoisted.
-    log.silly(log.prefix('hoistSrcDir'), `Removing build directory ${log.chalk.green(absPublishDir)}`);
-    await fs.rmdir(absPublishDir);
-    log.verbose(log.prefix('hoistSrcDir'), `Hoisted files from ${log.chalk.green(absPublishDir)} to publish root.`);
-  } catch (err) {
-    throw new Error(`${log.prefix('hoistSrcDir')} Error hoisting file/directory: ${err.message}`);
-  }
+  await Promise.all(srcFiles.map(async srcFile => {
+    const resolvedSrcFile = path.resolve(pkgRoot, srcFile);
+    const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''));
+    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`);
+    await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true });
+  }));
 }
 
 
@@ -211,40 +162,10 @@ export async function hoistSrcDir(publishWorkspace: string, publishDir: string) 
  * Provided a valid semver string, determines if it contains a prerelease
  * component (ex: 'beta') and returns it.
  */
-export function inferPublishTag(packageVersion: string) {
-  const parsed = semver.parse(packageVersion, { includePrerelease: true });
+export function inferPublishTag(pkgVersion: string) {
+  const parsed = semver.parse(pkgVersion, { includePrerelease: true });
 
-  if (!parsed) {
-    return;
-  }
-
-  if (parsed.prerelease.length > 0) {
-    const prereleaseTag = parsed.prerelease[0];
-
-    if (typeof prereleaseTag === 'string') {
-      return prereleaseTag;
-    }
-  }
-}
-
-
-/**
- * @deprecated - NPM does not support publishing symlinks.
- *
- * Provided the path to a publish workspace and a map of symlinks to create,
- * creates each symlink.
- *
- * Note: This function assumes that the "hoisting" phase has already been
- * completed.
- */
-export async function symlinkEntries(publishWorkspace: string, entries: Array<{from: string; to: string}>) {
-  try {
-    await Promise.all(R.map(async ({ from, to }) => {
-      const absolutePathToLinkDestination = path.resolve(publishWorkspace, from);
-      await fs.ensureSymlink(to, absolutePathToLinkDestination);
-      log.info(log.prefix('entry'), `${log.chalk.green.bold(from)} ${log.chalk.bold('→')} ${log.chalk.green(to)}`);
-    }, entries));
-  } catch (err) {
-    throw new Error(`${log.prefix('symlinkEntries')} Error creating symlink: ${err.message}`);
+  if (parsed && parsed.prerelease.length > 0 && typeof parsed.prerelease[0] === 'string') {
+    return parsed.prerelease[0];
   }
 }

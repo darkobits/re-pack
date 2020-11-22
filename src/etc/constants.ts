@@ -1,4 +1,4 @@
-import { RePackOptions } from 'etc/types';
+import { RePackArguments, PublishArguments } from 'etc/types';
 
 /**
  * Fields in package.json that may contain paths that will need to be re-written
@@ -16,12 +16,16 @@ export const REWRITE_FIELDS = [
 ];
 
 
-export const DEFAULT_OPTIONS: Required<RePackOptions> = {
-  cwd: process.cwd(),
-  srcDir: 'dist',
+export const DEFAULT_OPTIONS: RePackArguments = {
+  hoistDir: 'dist',
   packDir: '.re-pack',
-  publish: false,
   watch: false,
-  link: false,
+  link: false
+};
+
+
+export const DEFAULT_PUBLISH_OPTIONS: PublishArguments = {
+  hoistDir: 'dist',
+  packDir: '.re-pack',
   dryRun: false
 };

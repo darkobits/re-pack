@@ -6,20 +6,16 @@ import chokidar from 'chokidar';
 import * as R from 'ramda';
 
 import { DEFAULT_OPTIONS } from 'etc/constants';
-import { RePackOptions } from 'etc/types';
+import { RePackArguments } from 'etc/types';
 import log from 'lib/log';
 import {
-  linkPackage,
-  runLifecycleScript,
-  publishPackage
+  getPkgInfo,
+  linkPackage
 } from 'lib/npm';
 import {
-  createPublishWorkspace,
-  getPkgInfo,
-  hoistSrcDir,
+  createPackDir,
   packToPublishDir,
-  rewritePackageJson,
-  inferPublishTag
+  rewritePackageJson
 } from 'lib/utils';
 
 
@@ -29,27 +25,19 @@ import {
  * Accepts a RePackOptions object and re-packs the host package according to the
  * provided configuration.
  */
-export default async function rePack(userOptions: Required<RePackOptions>) {
+export default async function rePack(userOptions: RePackArguments) {
   const runTime = log.createTimer();
 
   // Merge options with defaults.
-  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]);
-
-  if (opts.publish && opts.watch) {
-    throw new Error('Options "publish" and "watch" are mutually exclusive.');
-  }
-
-  if (opts.publish && opts.link) {
-    throw new Error('Options "publish" and "link" are mutually exclusive.');
-  }
+  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments>;
 
   // Compute the absolute path to our working directory.
   const resolvedCwd = path.resolve(opts.cwd);
   log.verbose('cwd', resolvedCwd);
 
   // Compute the absolute path to our source directory.
-  const resolvedSrcDir = path.resolve(opts.srcDir);
-  log.verbose('srcDir', resolvedSrcDir);
+  const resolvedHoistDir = path.resolve(opts.hoistDir);
+  log.verbose('hoistDir', resolvedHoistDir);
 
   // eslint-disable-next-line prefer-const
   let [pkg, resolvedPackDir] = await Promise.all([
@@ -57,9 +45,8 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
     getPkgInfo(resolvedCwd),
     // Compute the absolute path to the publish workspace, create the
     // directory if needed, and ensure it is empty.
-    createPublishWorkspace(opts.packDir)
+    createPackDir(opts.packDir)
   ]);
-  log.verbose('packDir', resolvedPackDir);
 
 
   // ----- Prepare Package -----------------------------------------------------
@@ -67,7 +54,7 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
   let hasLinkedPackage = false;
 
   const preparePackage = async () => {
-    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing')} ${log.chalk.green(pkg.json.name)}`);
+    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`);
 
     if (opts.watch) {
       // If in watch mode, re-read package.json to ensure we pick up changes.
@@ -75,19 +62,20 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
     }
 
     // Create a new package.json and write it to the publish workspace.
-    await rewritePackageJson(pkg.json, resolvedSrcDir, resolvedPackDir);
+    await rewritePackageJson({
+      pkgJson: pkg.json,
+      hoistDir: resolvedHoistDir,
+      packDir: resolvedPackDir
+    });
 
-    // Use `npm pack` to collect all files to be published into a tarball, then
-    // extract that tarball to the publish workspace.
-    await packToPublishDir(pkg.rootDir, resolvedPackDir);
-
-    // Hoist the configured build directory into the workspace root, then delete
-    // it.
-    await hoistSrcDir(resolvedPackDir, opts.srcDir);
-
-    if (opts.watch || opts.link) {
-      log.info(log.prefix('pack'), log.chalk.bold('Done.'));
-    }
+    // Copy all files that would be included in the package's tarball to the
+    // re-pack workspace, hoisting any files in the configured 'hoistDir' to the
+    // workspace root.
+    await packToPublishDir({
+      pkgRoot: pkg.rootDir,
+      hoistDir: opts.hoistDir,
+      destDir: resolvedPackDir
+    });
 
     // Once the package is re-packed, perform a one-time `npm link` if the user
     // passed the --link option.
@@ -95,21 +83,11 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
       await linkPackage(resolvedPackDir);
       // eslint-disable-next-line require-atomic-updates
       hasLinkedPackage = true;
-      return;
-    }
-
-    // If the user passed the --publish option, publish the package.
-    if (opts.publish) {
-      await publishPackage({
-        cwd: resolvedPackDir,
-        dryRun: opts.dryRun,
-        tag: inferPublishTag(pkg.json.version)
-      });
     }
   };
 
 
-  // ----- Watching (Not Publishing) -------------------------------------------
+  // ----- Watching ------------------------------------------------------------
 
   let watcher: chokidar.FSWatcher;
 
@@ -121,11 +99,11 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
 
     const filesToWatch = [
       path.resolve(pkg.rootDir, 'package.json'),
-      resolvedSrcDir
+      resolvedHoistDir
     ];
 
     watcher = chokidar.watch(filesToWatch, {
-      cwd: pkg.rootDir,
+      // cwd: pkg.rootDir,
       ignoreInitial: true,
       // Ignore source-maps and declaration files.
       ignored: ['**/*.js.map', '**/*.d.ts'],
@@ -133,56 +111,17 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
     });
 
     watcher.on('ready', () => {
-      log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedSrcDir)}`);
+      log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedHoistDir)}`);
     });
 
     watcher.on('all', (event, changed) => {
       log.info(log.prefix('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`);
       void lock.acquire('re-pack', preparePackage);
     });
-  }
-
-
-  // ----- Publish (Not Watching) ----------------------------------------------
-
-  if (opts.publish) {
-    log.info(`Preparing package: ${log.chalk.green(pkg.json.name)}`);
-
-    // Run prepublishOnly script.
-    if (pkg.json.scripts?.prepublishOnly) {
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'prepublishOnly'
-      });
-    }
-
-    // Run prepare script.
-    if (pkg.json.scripts?.prepare) {
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'prepare'
-      });
-    }
-
-    // Re-pack & publish package.
-    await preparePackage();
-
-    // Run postpublish script.
-    if (pkg.json.scripts?.postpublish) {
-      await runLifecycleScript({
-        cwd: pkg.rootDir,
-        scriptName: 'postpublish'
-      });
-    }
-  }
-
-
-  // ----- Re-Pack Only --------------------------------------------------------
-
-  if (!opts.watch && !opts.publish) {
+  } else {
+    // Perform a one-time repack only.
     await preparePackage();
   }
-
 
   // ----- Compute Return Value ------------------------------------------------
 
@@ -199,7 +138,8 @@ export default async function rePack(userOptions: Required<RePackOptions>) {
     }
 
     // Otherwise, log the total run time.
-    log.info(log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));
+    log.info(log.prefix('pack'), `=> ${log.chalk.gray(resolvedPackDir)}`);
+    log.info(log.prefix('pack'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));
     resolve(resolvedPackDir);
   });
 }
