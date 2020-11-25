@@ -36,7 +36,10 @@ export default async function publish(userOptions: PublishArguments) {
 
     // Get package information.
     const pkg = await getPkgInfo(resolvedCwd);
-    log.info(log.prefix('publish'), `Preparing to publish package: ${log.chalk.green(`${pkg.json.name}@${pkg.json.version}`)}`);
+    log.info(log.prefix('publish'), [
+      `Preparing to publish package: ${log.chalk.green(`${pkg.json.name}@${pkg.json.version}`)}`,
+      opts.dryRun ? log.chalk.gray('(dry run)') : false
+    ].filter(Boolean).join(' '));
 
     // Compute dist-tag.
     const tag = opts.tag ?? inferPublishTag(pkg.json.version);
