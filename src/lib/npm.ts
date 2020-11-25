@@ -67,7 +67,7 @@ export async function getPackList(cwd: string) {
  */
 export async function linkPackage(cwd: string) {
   const pkgInfo = await getPkgInfo(cwd);
-  log.info(log.prefix('link'), `${log.chalk.bold('Linking package.')} ${log.chalk.green(pkgInfo.json.name)}`);
+  log.info(log.prefix('link'), `${log.chalk.bold('Linking package:')} ${log.chalk.green(pkgInfo.json.name)}`);
 
   await npm(['link', '--ignore-scripts'], {
     cwd,
