@@ -1,10 +1,8 @@
-module.exports = require('@darkobits/ts').nps(() => ({
+module.exports = require('@darkobits/ts').nps(({ npsUtils }) => ({
   scripts: {
-    repack: {
-      script: './dist/bin/cli.js',
-      watch: {
-        script: './dist/bin/cli.js --watch --link'
-      }
-    }
+    smokeTest: npsUtils.series(
+      './dist/bin/cli.js',
+      './dist/bin/cli.js publish --dry-run'
+    )
   }
 }));
