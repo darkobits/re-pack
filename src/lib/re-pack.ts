@@ -57,6 +57,7 @@ export default async function rePack(userOptions: RePackArguments) {
 
     if (opts.watch) {
       // If in watch mode, re-read package.json to ensure we pick up changes.
+      // eslint-disable-next-line require-atomic-updates
       pkg = await getPkgInfo(resolvedCwd);
     }
 
