@@ -1,3 +1,27 @@
+import type fs from 'fs-extra';
+
+
+export interface AfterRepackParams {
+  /**
+   * Reference to the fs-extra package.
+   */
+  fs: typeof fs;
+
+  /**
+   * Absolute path to the re-pack directory.
+   */
+  packDir: string;
+}
+
+
+/**
+ * Options allowed in re-pack configuration files.
+ */
+export interface RePackConfiguration {
+  afterRepack?: (params: AfterRepackParams) => void | Promise<void>;
+}
+
+
 /**
  * Arguments/options for the root command.
  */

@@ -3,7 +3,10 @@ import path from 'path';
 import * as R from 'ramda';
 
 import { DEFAULT_PUBLISH_OPTIONS } from 'etc/constants';
-import { PublishArguments } from 'etc/types';
+import {
+  PublishArguments,
+  RePackConfiguration
+} from 'etc/types';
 import config from 'lib/config';
 import log from 'lib/log';
 import {
@@ -22,13 +25,13 @@ import rePack from 'lib/re-pack';
  *
  * TODO: Add --access and --tag arguments.
  */
-export default async function publish(userOptions: PublishArguments) {
+export default async function publish(userOptions: PublishArguments & RePackConfiguration) {
   try {
     const runTime = log.createTimer();
     config.set('isPublishing', true);
 
     // Merge options with defaults.
-    const opts = R.mergeAll([DEFAULT_PUBLISH_OPTIONS, userOptions]) as Required<PublishArguments>;
+    const opts = R.mergeAll([DEFAULT_PUBLISH_OPTIONS, userOptions]) as Required<PublishArguments> & RePackConfiguration;
 
     // Compute the absolute path to our working directory.
     const resolvedCwd = path.resolve(opts.cwd);
@@ -71,7 +74,8 @@ export default async function publish(userOptions: PublishArguments) {
       // N.B. We want to pass the plain hoistDir here, not the resolved one, as
       // this function will be working with relative paths within the package.
       hoistDir: opts.hoistDir,
-      packDir: opts.packDir
+      packDir: opts.packDir,
+      afterRepack: opts.afterRepack
     });
 
     // Publish re-packed package.

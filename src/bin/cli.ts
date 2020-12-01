@@ -7,7 +7,11 @@ import {
   DEFAULT_OPTIONS,
   DEFAULT_PUBLISH_OPTIONS
 } from 'etc/constants';
-import { RePackArguments, PublishArguments } from 'etc/types';
+import {
+  RePackArguments,
+  RePackConfiguration,
+  PublishArguments
+} from 'etc/types';
 import log from 'lib/log';
 
 import config from 'lib/config';
@@ -23,7 +27,7 @@ const DESCRIPTIONS = {
 
 // ----- Re-Pack ---------------------------------------------------------------
 
-cli.command<Required<RePackArguments>>({
+cli.command<Required<RePackArguments>, RePackConfiguration>({
   command: '* [cwd]',
   description: 'Re-pack the host package.',
   config: {
@@ -64,15 +68,21 @@ cli.command<Required<RePackArguments>>({
       default: DEFAULT_OPTIONS.link
     });
   },
-  handler: async ({ argv }) => {
+  handler: async ({ argv, config, configPath }) => {
     try {
+      log.info('configPath', configPath);
+      log.info('config', config);
+
       adeiu(signal => {
         if (argv.watch) {
           log.info(`Got signal ${log.chalk.yellow(signal)}; closing watcher.`);
         }
       });
 
-      await rePack(argv);
+      await rePack({
+        ...argv,
+        ...config
+      });
     } catch (err) {
       log.error(err.message);
       log.verbose(err.stack.split('\n').slice(1).join('\n'));
@@ -84,13 +94,12 @@ cli.command<Required<RePackArguments>>({
 
 // ----- Publish ---------------------------------------------------------------
 
-cli.command<Required<PublishArguments>>({
+cli.command<Required<PublishArguments>, RePackConfiguration>({
   command: 'publish',
   description: 'Re-pack and publish the host package.',
   config: {
     fileName: 're-pack',
-    auto: false,
-    key: 'publish'
+    auto: false
   },
   builder: ({ command }) => {
     command.positional('cwd', {
@@ -138,9 +147,12 @@ cli.command<Required<PublishArguments>>({
 
     // command.wrap(128);
   },
-  handler: async ({ argv }) => {
+  handler: async ({ argv, config }) => {
     try {
-      await publish(argv);
+      await publish({
+        ...argv,
+        ...config
+      });
     } catch (err) {
       log.error(err.message);
       process.exit(1);
@@ -153,6 +165,9 @@ cli.command<Required<PublishArguments>>({
 
 cli.command({
   command: 'guard',
+  config: {
+    auto: false
+  },
   description: 'Guards against accidental invocations of `npm publish`. This command should be run as a "prepublishOnly" script.',
   handler: () => {
     try {

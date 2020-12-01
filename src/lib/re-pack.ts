@@ -2,11 +2,15 @@ import path from 'path';
 
 import adeiu from '@darkobits/adeiu';
 import AsyncLock from 'async-lock';
+import fs from 'fs-extra';
 import chokidar from 'chokidar';
 import * as R from 'ramda';
 
 import { DEFAULT_OPTIONS } from 'etc/constants';
-import { RePackArguments } from 'etc/types';
+import {
+  RePackArguments,
+  RePackConfiguration
+} from 'etc/types';
 import log from 'lib/log';
 import {
   getPkgInfo,
@@ -25,11 +29,11 @@ import {
  * Accepts a RePackOptions object and re-packs the host package according to the
  * provided configuration.
  */
-export default async function rePack(userOptions: RePackArguments) {
+export default async function rePack(userOptions: RePackArguments & RePackConfiguration) {
   const runTime = log.createTimer();
 
   // Merge options with defaults.
-  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments>;
+  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments> & RePackConfiguration;
 
   // Compute the absolute path to our working directory.
   const resolvedCwd = path.resolve(opts.cwd);
@@ -76,6 +80,17 @@ export default async function rePack(userOptions: RePackArguments) {
       hoistDir: opts.hoistDir,
       destDir: resolvedPackDir
     });
+
+    if (typeof opts.afterRepack === 'function') {
+      log.verbose(log.prefix('pack'), 'Running afterRepack function.');
+
+      try {
+        await opts.afterRepack({ fs, packDir: resolvedPackDir });
+      } catch (err) {
+        err.message = `${log.prefix('afterRepack')} ${err.message}`;
+        throw err;
+      }
+    }
 
     // Once the package is re-packed, perform a one-time `npm link` if the user
     // passed the --link option.
