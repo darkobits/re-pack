@@ -26,7 +26,7 @@
     "@darkobits/adeiu": "^0.2.8",
     "@darkobits/chex": "^0.1.8",
     "@darkobits/log": "^2.0.0-beta.15",
-    "@darkobits/saffron": "^0.1.12",
+    "@darkobits/saffron": "^0.1.13",
     "async-lock": "^1.2.4",
     "chokidar": "^3.4.3",
     "conf": "^7.1.2",
@@ -37,11 +37,9 @@
     "tempy": "^1.0.0"
   },
   "devDependencies": {
-    "@darkobits/ts": "^0.1.0-beta.18",
+    "@darkobits/ts": "^0.1.1",
     "@types/async-lock": "^1.1.2",
     "@types/fs-extra": "^9.0.4",
-    "@types/jest": "^26.0.8",
-    "@types/node": "^14.14.9",
     "@types/npm-packlist": "^1.1.1",
     "@types/ramda": "^0.27.32",
     "@types/semver": "^7.3.4"
