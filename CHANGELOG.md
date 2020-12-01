@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/darkobits/re-pack/compare/v0.1.4...v0.1.5) (2020-12-01)
+
+
+### 🏗 Chores
+
+* Update dependencies. ([619eb6b](https://github.com/darkobits/re-pack/commit/619eb6b807fc492d30b11023f858edbcd68a4a95))
+* Update dependencies. ([a0ca4c9](https://github.com/darkobits/re-pack/commit/a0ca4c9755dc491044207f76527147b90de25072))
+* Update Travis config. ([72219ce](https://github.com/darkobits/re-pack/commit/72219ce41431c69642032c1c56a5e6d6997282e0))
+
+
+### ✨ Features
+
+* Add afterRepack configuration option. ([f81159c](https://github.com/darkobits/re-pack/commit/f81159cc9b07fc1114c14f17f9680907644c8bb6))
+
 ### [0.1.4](https://github.com/darkobits/re-pack/compare/v0.1.3...v0.1.4) (2020-11-25)
 
 ### [0.1.3](https://github.com/darkobits/re-pack/compare/v0.1.2...v0.1.3) (2020-11-22)
