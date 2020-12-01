@@ -15,10 +15,6 @@
     "re-pack": "dist/bin/cli.js"
   },
   "scripts": {
-    "lint": "nps lint",
-    "test": "nps test",
-    "build": "nps build",
-    "bump": "nps bump",
     "prepare": "nps prepare",
     "help": "nps --scripts"
   },
@@ -27,6 +23,7 @@
     "@darkobits/chex": "^0.1.8",
     "@darkobits/log": "^2.0.0-beta.15",
     "@darkobits/saffron": "^0.1.13",
+    "@types/fs-extra": "^9.0.4",
     "async-lock": "^1.2.4",
     "chokidar": "^3.4.3",
     "conf": "^7.1.2",
@@ -37,9 +34,8 @@
     "tempy": "^1.0.0"
   },
   "devDependencies": {
-    "@darkobits/ts": "^0.1.1",
+    "@darkobits/ts": "^0.1.2",
     "@types/async-lock": "^1.1.2",
-    "@types/fs-extra": "^9.0.4",
     "@types/npm-packlist": "^1.1.1",
     "@types/ramda": "^0.27.32",
     "@types/semver": "^7.3.4"
