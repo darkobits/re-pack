@@ -19,11 +19,11 @@
     "help": "nps --scripts"
   },
   "dependencies": {
-    "@darkobits/adeiu": "^0.2.8",
-    "@darkobits/chex": "^0.1.8",
+    "@darkobits/adeiu": "^0.2.10",
+    "@darkobits/chex": "^0.1.10",
     "@darkobits/log": "^2.0.0-beta.15",
-    "@darkobits/saffron": "^0.1.14",
-    "@types/fs-extra": "^9.0.4",
+    "@darkobits/saffron": "^0.1.15",
+    "@types/fs-extra": "^9.0.5",
     "async-lock": "^1.2.6",
     "chokidar": "^3.4.3",
     "conf": "^7.1.2",
@@ -34,10 +34,10 @@
     "tempy": "^1.0.0"
   },
   "devDependencies": {
-    "@darkobits/ts": "^0.1.5",
+    "@darkobits/ts": "^0.2.0",
     "@types/async-lock": "^1.1.2",
     "@types/npm-packlist": "^1.1.1",
-    "@types/ramda": "^0.27.32",
+    "@types/ramda": "^0.27.33",
     "@types/semver": "^7.3.4"
   }
 }
