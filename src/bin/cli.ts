@@ -70,8 +70,10 @@ cli.command<Required<RePackArguments>, RePackConfiguration>({
   },
   handler: async ({ argv, config, configPath }) => {
     try {
-      log.info('configPath', configPath);
-      log.info('config', config);
+      if (configPath) {
+        log.verbose(log.prefix('config'), `Loaded configuration from: ${log.chalk.green(configPath)}`);
+        log.silly(log.prefix('config'), config);
+      }
 
       adeiu(signal => {
         if (argv.watch) {
