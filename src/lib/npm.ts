@@ -1,7 +1,9 @@
 import path from 'path';
 
 import chex from '@darkobits/chex';
+import fs from 'fs-extra';
 import packlist from 'npm-packlist';
+import * as R from 'ramda';
 import readPkgUp, { NormalizedPackageJson } from 'read-pkg-up';
 
 import log from 'lib/log';
@@ -61,18 +63,28 @@ export async function getPackList(cwd: string) {
 // ----- Link ------------------------------------------------------------------
 
 /**
- * Runs `npm link` from the provided directory.
- *
- * Note: NPM 7.x may not honor the --ignore-scripts flag.
+ * Runs `npm link` from the provided directory.Because NPM 7+ no longer honors
+ * --ignore-scripts when linking packages, this function will temporarily remove
+ * the "prepare" script, link the package, and then re-add it. This is janky,
+ * but necessary.
  */
 export async function linkPackage(cwd: string) {
   const pkgInfo = await getPkgInfo(cwd);
+  const pkgJsonPath = path.join(pkgInfo.rootDir, 'package.json');
+
   log.info(log.prefix('link'), `${log.chalk.bold('Linking package:')} ${log.chalk.green(pkgInfo.json.name)}`);
+
+  const prepareScript = R.path(['scripts', 'prepare'], pkgInfo.json);
+  log.warn(log.prefix('link'), `Blocking invocation of prepare script: ${log.chalk.green(`"${prepareScript}"`)}`);
+  const pkgJsonWithoutPrepareScript = R.dissocPath(['scripts', 'prepare'], pkgInfo.json);
+  await fs.writeJSON(pkgJsonPath, pkgJsonWithoutPrepareScript, { spaces: 2 });
 
   await npm(['link', '--ignore-scripts'], {
     cwd,
     stdio: 'inherit'
   });
+
+  await fs.writeJSON(pkgJsonPath, pkgInfo.json, { spaces: 2 });
 
   log.info(log.prefix('link'), log.chalk.bold('Done.'));
 }

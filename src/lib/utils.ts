@@ -67,13 +67,13 @@ export async function createPackDir(workspacePath?: string) {
  */
 export interface RewritePackageJsonOptions {
   /**
-   * Normalized package json data to re-write.
+   * Normalized package.json data to re-write.
    */
   pkgJson: NormalizedPackageJson;
 
   /**
-   * Directory the the project to be hoisted to root. Used to determine how to
-   * re-write paths in package.json.
+   * Sub-directory in the local project that will become the root directory in
+   * the re-packed project. Usually 'dist' or 'lib'.
    */
   hoistDir: string;
 
@@ -82,6 +82,7 @@ export interface RewritePackageJsonOptions {
    */
   packDir: string;
 }
+
 export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: RewritePackageJsonOptions) {
   const rewriteField = (value: string) => path.relative(hoistDir, value);
 
