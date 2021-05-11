@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.10](https://github.com/darkobits/re-pack/compare/v0.1.9...v0.1.10) (2021-05-11)
+
+
+### 🐞 Bug Fixes
+
+* **npm:** Support NPM 7. ([49b234e](https://github.com/darkobits/re-pack/commit/49b234e10d1603ac84665909a2d1c173acbae772))
+
 ### [0.1.9](https://github.com/darkobits/re-pack/compare/v0.1.8...v0.1.9) (2020-12-24)
 
 
