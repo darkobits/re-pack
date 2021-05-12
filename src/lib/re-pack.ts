@@ -12,12 +12,10 @@ import {
   RePackConfiguration
 } from 'etc/types';
 import log from 'lib/log';
-import {
-  getPkgInfo,
-  linkPackage
-} from 'lib/npm';
+import { linkPackage } from 'lib/npm';
 import {
   createPackDir,
+  getPkgInfo,
   packToPublishDir,
   rewritePackageJson
 } from 'lib/utils';

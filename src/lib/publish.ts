@@ -10,11 +10,10 @@ import {
 import config from 'lib/config';
 import log from 'lib/log';
 import {
-  getPkgInfo,
   runLifecycleScript,
   publishPackage
 } from 'lib/npm';
-import { inferPublishTag } from 'lib/utils';
+import { getPkgInfo, inferPublishTag } from 'lib/utils';
 import rePack from 'lib/re-pack';
 
 

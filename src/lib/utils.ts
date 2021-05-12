@@ -3,13 +3,44 @@ import path from 'path';
 import fs from 'fs-extra';
 import ow from 'ow';
 import * as R from 'ramda';
-import { NormalizedPackageJson } from 'read-pkg-up';
+import readPkgUp, { NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
 import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
 import { getPackList } from 'lib/npm';
+
+
+export interface PkgInfo {
+  /**
+   * Normalized package.json for the resolved package.
+   */
+  json: NormalizedPackageJson;
+
+  /**
+   * Root directory for the resolved package.
+   */
+  rootDir: string;
+}
+
+/**
+ * Reads the package.json for the host package by walking up the directory tree
+ * from the current working directory. An optional `cwd` param may be provided
+ * to override the default.
+ */
+export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> {
+  const pkgInfo = await readPkgUp({ cwd });
+
+  if (!pkgInfo) {
+    throw new Error(`${log.prefix('getPkgInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`);
+  }
+
+  const rootDir = path.dirname(pkgInfo.path);
+  const json = pkgInfo.packageJson;
+
+  return { json, rootDir };
+}
 
 
 /**
@@ -176,4 +207,35 @@ export function inferPublishTag(pkgVersion: string) {
   if (parsed && parsed.prerelease.length > 0 && typeof parsed.prerelease[0] === 'string') {
     return parsed.prerelease[0];
   }
+}
+
+
+export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: PkgInfo) {
+  const pkgJsonPath = path.join(pkgInfo.rootDir, 'package.json');
+
+  const pkgJsonWithoutScripts = R.clone(pkgInfo.json);
+
+  // Remove "prepare" script if it is present.
+  const prepareScript = R.path(['scripts', 'prepare'], pkgJsonWithoutScripts);
+
+  if (prepareScript && pkgJsonWithoutScripts.scripts) {
+    log.warn(log.prefix('link'), `Blocking invocation of prepare script: ${log.chalk.green(`"${prepareScript}"`)}`);
+    Reflect.deleteProperty(pkgJsonWithoutScripts.scripts, 'prepare');
+  }
+
+  // Remove "prepublishOnly" script if it is present.
+  const prepublishOnlyScript = R.path(['scripts', 'prepublishOnly'], pkgJsonWithoutScripts);
+
+  if (prepublishOnlyScript && pkgJsonWithoutScripts.scripts) {
+    log.warn(log.prefix('link'), `Blocking invocation of prepublishOnly script: ${log.chalk.green(`"${prepublishOnlyScript}"`)}`);
+    Reflect.deleteProperty(pkgJsonWithoutScripts.scripts, 'prepublishOnly');
+  }
+
+  // Write modified package.json.
+  await fs.writeJSON(pkgJsonPath, pkgJsonWithoutScripts, { spaces: 2 });
+
+  // Return a function that will restore the original package.json.
+  return async () => {
+    await fs.writeJSON(pkgJsonPath, pkgInfo.json, { spaces: 2 });
+  };
 }
