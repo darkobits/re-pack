@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.com/darkobits/re-pack/compare/v0.1.10...v0.1.11) (2021-05-12)
+
+
+### 🏗 Chores
+
+* **deps:** Update dependencies. ([95ccd20](https://github.com/darkobits/re-pack/commit/95ccd20841478082fdf20089c7cc1f607551fc68))
+
+
+### 🐞 Bug Fixes
+
+* **npm:** Remove problematic scripts during publish. ([aac9822](https://github.com/darkobits/re-pack/commit/aac982262c82389449cb6cf2dddc3e961e3e0e50))
+
 ### [0.1.10](https://github.com/darkobits/re-pack/compare/v0.1.9...v0.1.10) (2021-05-11)
 
 
