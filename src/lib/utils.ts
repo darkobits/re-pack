@@ -87,6 +87,7 @@ export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: Rewrite
   const rewriteField = (value: string) => path.relative(hoistDir, value);
 
   try {
+    // @ts-expect-error
     const newPkgJson = R.reduce((acc, curField) => {
       if (!R.has(curField, acc)) {
         return acc;
@@ -147,6 +148,7 @@ export interface PackToPublishDirOptions {
    */
   destDir: string;
 }
+
 export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPublishDirOptions) {
   const srcFiles: Array<string> = await getPackList(pkgRoot);
 
