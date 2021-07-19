@@ -19,6 +19,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci --ignore-scripts
       - name: Build Project
-        run: npx nps build
+        run: npx nr build
       - name: Run Tests
-        run: npx nps smokeTest
+        run: npx nr smokeTest
