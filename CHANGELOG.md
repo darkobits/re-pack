@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/darkobits/re-pack/compare/v1.0.1...v1.0.2) (2022-03-24)
+
+
+### 🐞 Bug Fixes
+
+* Add required field for CLI config. ([25b1aea](https://github.com/darkobits/re-pack/commit/25b1aeaeb418bf9b0a727d83d43639b14b2f2825))
+
 ### [1.0.1](https://github.com/darkobits/re-pack/compare/v1.0.0...v1.0.1) (2022-03-24)
 
 
