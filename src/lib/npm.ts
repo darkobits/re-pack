@@ -110,7 +110,15 @@ export async function publishPackage({ cwd, tag, dryRun }: PublishOptions) {
 
   const restorePackageJson = await temporarilyRemoveProblematicPackageScripts(pkgInfo);
 
-  await npm(args, { cwd, stdio: 'inherit' });
+  await npm(args, {
+    cwd,
+    stdio: 'inherit',
+    env: {
+      // Note: Unsure why this wasn't getting populated in the child process'
+      // environment.
+      NPM_TOKEN: process.env.NPM_TOKEN
+    }
+  });
 
   await restorePackageJson();
 }
