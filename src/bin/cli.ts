@@ -168,6 +168,8 @@ cli.command<Required<PublishArguments>, RePackConfiguration>({
 cli.command({
   command: 'guard',
   config: {
+    // TODO: Update saffron to make this optional.
+    fileName: 're-pack',
     auto: false
   },
   description: 'Guards against accidental invocations of `npm publish`. This command should be run as a "prepublishOnly" script.',
