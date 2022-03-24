@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-beta.2](https://github.com/darkobits/re-pack/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2022-03-24)
+
+
+### 🐞 Bug Fixes
+
+* Ensure rewritten fields begin with `./` for ESM compatibility. ([257699c](https://github.com/darkobits/re-pack/commit/257699ceca7db555d84d43a577a6d03429464d2b))
+
 ## [1.0.0-beta.1](https://github.com/darkobits/re-pack/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2022-03-24)
 
 
