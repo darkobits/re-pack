@@ -81,8 +81,8 @@ export async function runLifecycleScript(opts: RunLifecycleScriptOptions) {
 
 export interface PublishOptions {
   cwd: string;
-  dryRun?: boolean;
-  tag?: string;
+  dryRun?: boolean | undefined;
+  tag?: string | undefined;
 }
 
 /**

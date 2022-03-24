@@ -13,8 +13,8 @@ import {
   runLifecycleScript,
   publishPackage
 } from 'lib/npm';
-import { getPkgInfo, inferPublishTag } from 'lib/utils';
 import rePack from 'lib/re-pack';
+import { getPkgInfo, inferPublishTag } from 'lib/utils';
 
 
 // ---- Publish ----------------------------------------------------------------

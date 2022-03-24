@@ -1,4 +1,4 @@
-import type fs from 'fs-extra';
+import type * as fs from 'fs-extra';
 
 
 export interface AfterRepackParams {
@@ -18,7 +18,7 @@ export interface AfterRepackParams {
  * Options allowed in re-pack configuration files.
  */
 export interface RePackConfiguration {
-  afterRepack?: (params: AfterRepackParams) => void | Promise<void>;
+  afterRepack?: ((params: AfterRepackParams) => void | Promise<void>) | undefined;
 }
 
 
@@ -31,7 +31,7 @@ export interface RePackArguments {
    *
    * Default: process.cwd()
    */
-  cwd?: string;
+  cwd: string;
 
   /**
    * Sub-directory in the host package (typically containing build artifacts) to
@@ -39,30 +39,28 @@ export interface RePackArguments {
    *
    * Default: 'dist'
    */
-  hoistDir?: string;
+  hoistDir: string;
 
   /**
    * (Optional) Directory where re-pack will stage files to be published.
    *
    * Default: .re-pack
    */
-  packDir?: string;
+  packDir: string;
 
   /**
    * If true, continuously watches `hoistDir` and re-packs to `outDir`.
    *
    * Default: false
    */
-  watch?: boolean;
+  watch?: boolean | undefined;
 
   /**
    * If true, runs `npm link` after re-packing.
    *
    * Default: false
    */
-  link?: boolean;
-
-
+  link?: boolean | undefined;
 }
 
 
@@ -75,7 +73,7 @@ export interface PublishArguments {
    *
    * Default: process.cwd()
    */
-  cwd?: string;
+  cwd: string;
 
   /**
    * Sub-directory in the host package (typically containing build artifacts) to
@@ -83,21 +81,21 @@ export interface PublishArguments {
    *
    * Default: 'dist'
    */
-  hoistDir?: string;
+  hoistDir: string;
 
   /**
    * (Optional) Directory where re-pack will stage files to be published.
    *
    * Default: .re-pack
    */
-  packDir?: string;
+  packDir: string;
 
   /**
    * Passes the --dry-run flag to `npm publish`.
    *
    * Default: false
    */
-  dryRun?: boolean;
+  dryRun?: boolean | undefined;
 
   /**
    * Optional access to set on the published package. Forwards to the --access
@@ -105,7 +103,7 @@ export interface PublishArguments {
    *
    * Default: N/A
    */
-  access?: string;
+  access?: string | undefined;
 
   /**
    * Optional dist-tag to publish the package under. Forwards to the --tag
@@ -113,5 +111,5 @@ export interface PublishArguments {
    *
    * Default: N/A
    */
-  tag?: string;
+  tag?: string | undefined;
 }

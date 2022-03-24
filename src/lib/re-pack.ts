@@ -1,9 +1,8 @@
 import path from 'path';
 
-import adeiu from '@darkobits/adeiu';
 import AsyncLock from 'async-lock';
-import fs from 'fs-extra';
 import chokidar from 'chokidar';
+import fs from 'fs-extra';
 import * as R from 'ramda';
 
 import { DEFAULT_OPTIONS } from 'etc/constants';
@@ -11,6 +10,7 @@ import {
   RePackArguments,
   RePackConfiguration
 } from 'etc/types';
+import { adeiu } from 'lib/cjs-interop';
 import log from 'lib/log';
 import { linkPackage } from 'lib/npm';
 import {
@@ -84,7 +84,7 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
 
       try {
         await opts.afterRepack({ fs, packDir: resolvedPackDir });
-      } catch (err) {
+      } catch (err: any) {
         err.message = `${log.prefix('afterRepack')} ${err.message}`;
         throw err;
       }

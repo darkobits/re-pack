@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import adeiu from '@darkobits/adeiu';
 import cli from '@darkobits/saffron';
 
 import {
@@ -12,18 +11,19 @@ import {
   RePackConfiguration,
   PublishArguments
 } from 'etc/types';
-import log from 'lib/log';
-
+import { adeiu } from 'lib/cjs-interop';
 import config from 'lib/config';
-import rePack from 'lib/re-pack';
+import log from 'lib/log';
 import publish from 'lib/publish';
 import publishGuard from 'lib/publish-guard';
+import rePack from 'lib/re-pack';
 
 
 const DESCRIPTIONS = {
   HOIST_DIR: 'Directory to hoist to the re-pack root.',
   PACK_DIR: 'Directory where the package will be re-packed.'
 };
+
 
 // ----- Re-Pack ---------------------------------------------------------------
 
@@ -85,7 +85,7 @@ cli.command<Required<RePackArguments>, RePackConfiguration>({
         ...argv,
         ...config
       });
-    } catch (err) {
+    } catch (err: any) {
       log.error(err.message);
       log.verbose(err.stack.split('\n').slice(1).join('\n'));
       process.exit(1);
@@ -155,7 +155,7 @@ cli.command<Required<PublishArguments>, RePackConfiguration>({
         ...argv,
         ...config
       });
-    } catch (err) {
+    } catch (err: any) {
       log.error(err.message);
       process.exit(1);
     }
@@ -174,7 +174,7 @@ cli.command({
   handler: () => {
     try {
       publishGuard();
-    } catch (err) {
+    } catch (err: any) {
       log.error(err.message);
       config.set('isPublishing', false);
       process.exit(1);

@@ -1,13 +1,13 @@
 import path from 'path';
 
 import fs from 'fs-extra';
-import ow from 'ow';
 import * as R from 'ramda';
-import readPkgUp, { NormalizedPackageJson } from 'read-pkg-up';
+import { readPackageUp, NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
 import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
+import { ow } from 'lib/cjs-interop';
 import log from 'lib/log';
 import { getPackList } from 'lib/npm';
 
@@ -30,7 +30,7 @@ export interface PkgInfo {
  * to override the default.
  */
 export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> {
-  const pkgInfo = await readPkgUp({ cwd });
+  const pkgInfo = await readPackageUp({ cwd });
 
   if (!pkgInfo) {
     throw new Error(`${log.prefix('getPkgInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`);
@@ -70,7 +70,7 @@ export async function createPackDir(workspacePath?: string) {
   // Ensure re-pack directory exists, creating any directories as-needed.
   try {
     await fs.ensureDir(resolvedPackDir);
-  } catch (err) {
+  } catch (err: any) {
     err.message = `${log.prefix('createPackDir')} Unable to create re-pack directory: ${err.message}`;
     throw err;
   }
@@ -78,7 +78,7 @@ export async function createPackDir(workspacePath?: string) {
   // Ensure the re-pack directory is empty, deleting files as needed.
   try {
     await fs.emptyDir(resolvedPackDir);
-  } catch (err) {
+  } catch (err: any) {
     err.message = `${log.prefix('createPackDir')} Unable to ensure publish workspace is empty: ${err.message}`;
     throw err;
   }
@@ -150,7 +150,7 @@ export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: Rewrite
     // Write the new package.json to the publish workspace.
     await fs.writeJson(path.resolve(packDir, 'package.json'), newPkgJson, { spaces: 2 });
     log.verbose(log.prefix('rewritePackageJson'), `Wrote ${log.chalk.green('package.json')} to publish workspace.`);
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(`${log.prefix('rewritePackageJson')} Error re-writing package.json: ${err.message}`);
   }
 }

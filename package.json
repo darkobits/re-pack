@@ -2,6 +2,7 @@
   "name": "@darkobits/re-pack",
   "version": "0.1.12",
   "author": "darkobits",
+  "type": "module",
   "license": "WTFPL",
   "description": "Utility for managing NPM package contents.",
   "repository": {
