@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-beta.1](https://github.com/darkobits/re-pack/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2022-03-24)
+
+
+### 🐞 Bug Fixes
+
+* Add missing dependency. ([d90a13d](https://github.com/darkobits/re-pack/commit/d90a13d1d41ad250d11a7e24e25888b0ef5b147b))
+
 ## [1.0.0-beta.0](https://github.com/darkobits/re-pack/compare/v0.1.12...v1.0.0-beta.0) (2022-03-24)
 
 
