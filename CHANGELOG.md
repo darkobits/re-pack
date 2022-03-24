@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-beta.0](https://github.com/darkobits/re-pack/compare/v0.1.12...v1.0.0-beta.0) (2022-03-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* Consumers should verify compatibility after upgrading to this version.
+
+### 🏗 Chores
+
+* **deps:** Update dependencies. ([cc960ac](https://github.com/darkobits/re-pack/commit/cc960acc28627f7e1030584b92ca494a3f24d87a))
+* **deps:** Update dependencies. ([1c97c30](https://github.com/darkobits/re-pack/commit/1c97c3086abcb573a8d9ba9216217e6791956466))
+
+
+### 🛠 Refactoring
+
+* This package is now pure ESM. ([87ad043](https://github.com/darkobits/re-pack/commit/87ad0439a4d7fa737479092dce2f91cad5d8b48c))
+
 ### [0.1.12](https://github.com/darkobits/re-pack/compare/v0.1.11...v0.1.12) (2021-07-19)
 
 
