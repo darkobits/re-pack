@@ -115,7 +115,15 @@ export interface RewritePackageJsonOptions {
 }
 
 export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: RewritePackageJsonOptions) {
-  const rewriteField = (value: string) => `./${path.relative(hoistDir, value)}`;
+  const rewriteField = (value: string) => {
+    const relativePath = path.relative(hoistDir, value);
+
+    if (relativePath) {
+      return `./${path.relative(hoistDir, value)}`;
+    }
+
+    return relativePath;
+  };
 
   try {
     // @ts-expect-error
