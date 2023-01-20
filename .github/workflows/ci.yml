@@ -1,24 +1,39 @@
-name: CI
+name: ci
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+env:
+  FORCE_COLOR: 3
+concurrency:
+  group: ${{ github.ref_name }}
+  # Only cancel concurrent builds when we are not on the default branch. This
+  # way, if a commit breaks the default branch, we can more easily determine
+  # which commit caused the failure.
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 jobs:
-  CI:
-    name: Build & Test
+  ci:
+    name: CI
+    # Skip building tags; an identical job for the commit to which the tag
+    # points will be triggered anyway.
+    if: github.ref_type != 'tag'
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch Repository
-        uses: actions/checkout@v2
+      - name: Clone Repository
+        uses: actions/checkout@v3
         with:
-          # Ensures we fetch all tags.
           fetch-depth: 0
-      - name: Set Up Node
-        uses: actions/setup-node@v1
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
+          cache: npm
       - name: Install Dependencies
-        run: npm ci --ignore-scripts
+        run: npm clean-install --ignore-scripts
       - name: Build Project
         run: npx nr build
-      - name: Run Tests
+      - name: Run Smoke Tests
         run: npx nr smokeTest
