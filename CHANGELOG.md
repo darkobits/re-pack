@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.5](https://github.com/darkobits/re-pack/compare/v1.0.4...v1.0.5) (2023-01-20)
+
+
+### 📖 Documentation
+
+* Update README. ([d5a1d33](https://github.com/darkobits/re-pack/commit/d5a1d33e71f6a490141e43192e86a77cada39a1e))
+
+
+### 🏗 Chores
+
+* **deps:** Update dependencies. ([e2dff1e](https://github.com/darkobits/re-pack/commit/e2dff1e0d2a1872ac350ab79cf3ddd17def4d426))
+* Update `.ci.yml`. ([a97e24a](https://github.com/darkobits/re-pack/commit/a97e24a67f0df61aac29baade3c3bf200bba25bf))
+
 ### [1.0.4](https://github.com/darkobits/re-pack/compare/v1.0.3...v1.0.4) (2022-03-25)
 
 
