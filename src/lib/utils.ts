@@ -210,6 +210,7 @@ export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPub
  * component (ex: 'beta') and returns it.
  */
 export function inferPublishTag(pkgVersion: string) {
+  // @ts-expect-error - Typings appear to be broken in most recent version.
   const parsed = semver.parse(pkgVersion, { includePrerelease: true });
 
   if (parsed && parsed.prerelease.length > 0 && typeof parsed.prerelease[0] === 'string') {
@@ -221,26 +222,26 @@ export function inferPublishTag(pkgVersion: string) {
 export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: PkgInfo) {
   const pkgJsonPath = path.join(pkgInfo.rootDir, 'package.json');
 
-  const pkgJsonWithoutScripts = R.clone(pkgInfo.json);
+  const clonedPackageJson = R.clone(pkgInfo.json);
 
   // Remove "prepare" script if it is present.
-  const prepareScript = R.path(['scripts', 'prepare'], pkgJsonWithoutScripts);
+  const prepareScript = R.path<string>(['scripts', 'prepare'], clonedPackageJson);
 
-  if (prepareScript && pkgJsonWithoutScripts.scripts) {
+  if (prepareScript && clonedPackageJson.scripts) {
     log.warn(log.prefix('link'), `Blocking invocation of prepare script: ${log.chalk.green(`"${prepareScript}"`)}`);
-    Reflect.deleteProperty(pkgJsonWithoutScripts.scripts, 'prepare');
+    Reflect.deleteProperty(clonedPackageJson.scripts, 'prepare');
   }
 
   // Remove "prepublishOnly" script if it is present.
-  const prepublishOnlyScript = R.path(['scripts', 'prepublishOnly'], pkgJsonWithoutScripts);
+  const prepublishOnlyScript = R.path<string>(['scripts', 'prepublishOnly'], clonedPackageJson);
 
-  if (prepublishOnlyScript && pkgJsonWithoutScripts.scripts) {
+  if (prepublishOnlyScript && clonedPackageJson.scripts) {
     log.warn(log.prefix('link'), `Blocking invocation of prepublishOnly script: ${log.chalk.green(`"${prepublishOnlyScript}"`)}`);
-    Reflect.deleteProperty(pkgJsonWithoutScripts.scripts, 'prepublishOnly');
+    Reflect.deleteProperty(clonedPackageJson.scripts, 'prepublishOnly');
   }
 
   // Write modified package.json.
-  await fs.writeJSON(pkgJsonPath, pkgJsonWithoutScripts, { spaces: 2 });
+  await fs.writeJSON(pkgJsonPath, clonedPackageJson, { spaces: 2 });
 
   // Return a function that will restore the original package.json.
   return async () => {

@@ -3,16 +3,16 @@ import { nr } from '@darkobits/ts';
 
 const require = createRequire(import.meta.url);
 
-export default nr(({ createCommand, createScript }) => {
+export default nr(({ command, script }) => {
   try {
-    createScript('smokeTests', {
+    script('smokeTests', {
       group: 'Testing',
       description: 'Runs smoke tests.',
       run: [
-        createCommand('smoke-tests', [
+        command('smoke-tests', [
           require.resolve('./dist/bin/cli.js')
         ], {}),
-        createCommand('smoke-tests', [
+        command('smoke-tests', [
           require.resolve('./dist/bin/cli.js'), ['publish'], { dryRun: true}
         ], {})
       ]
