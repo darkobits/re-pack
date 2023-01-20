@@ -23,7 +23,7 @@
     "@darkobits/adeiu": "^0.2.14",
     "@darkobits/chex": "^2.0.3",
     "@darkobits/log": "^2.0.0-beta.16",
-    "@darkobits/saffron": "^0.30.0-beta.2",
+    "@darkobits/saffron": "^0.30.0-beta.3",
     "async-lock": "^1.4.0",
     "chokidar": "^3.5.3",
     "conf": "^10.1.1",
