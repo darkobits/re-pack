@@ -2,7 +2,6 @@
   "name": "@darkobits/re-pack",
   "version": "1.0.8",
   "author": "darkobits",
-  "type": "module",
   "license": "WTFPL",
   "description": "Utility for managing NPM package contents.",
   "repository": {
@@ -21,9 +20,9 @@
   },
   "dependencies": {
     "@darkobits/adeiu": "^0.2.14",
-    "@darkobits/chex": "^2.0.3",
+    "@darkobits/chex": "^2.0.7",
     "@darkobits/log": "^2.0.0-beta.16",
-    "@darkobits/saffron": "^0.30.0-beta.3",
+    "@darkobits/saffron": "^0.4.30",
     "async-lock": "^1.4.0",
     "chokidar": "^3.5.3",
     "conf": "^10.1.1",
@@ -31,13 +30,13 @@
     "npm-packlist": "^4.0.0",
     "ow": "~0.28.0",
     "ramda": "^0.28.0",
-    "read-pkg-up": "^9.1.0",
+    "read-pkg-up": "~7.0.1",
     "semver": "^7.3.8",
-    "tempy": "^2.0.0"
+    "tempy": "~1.0.1"
   },
   "devDependencies": {
     "@darkobits/eslint-plugin": "^0.2.10",
-    "@darkobits/ts": "^0.13.0",
+    "@darkobits/ts": "^0.13.3",
     "@types/async-lock": "^1.3.0",
     "@types/fs-extra": "^11.0.1",
     "@types/npm-packlist": "^3.0.0",

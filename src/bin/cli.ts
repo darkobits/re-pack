@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import adeiu from '@darkobits/adeiu';
 import cli from '@darkobits/saffron';
 
 import {
@@ -11,7 +12,6 @@ import {
   RePackConfiguration,
   PublishArguments
 } from 'etc/types';
-import { adeiu } from 'lib/cjs-interop';
 import config from 'lib/config';
 import log from 'lib/log';
 import publish from 'lib/publish';

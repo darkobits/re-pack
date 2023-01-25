@@ -1,13 +1,13 @@
 import path from 'path';
 
 import fs from 'fs-extra';
+import ow from 'ow';
 import * as R from 'ramda';
-import { readPackageUp, NormalizedPackageJson } from 'read-pkg-up';
+import readPackageUp, { NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
 import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
-import { ow } from 'lib/cjs-interop';
 import log from 'lib/log';
 import { getPackList } from 'lib/npm';
 

@@ -1,5 +1,6 @@
 import path from 'path';
 
+import adeiu from '@darkobits/adeiu';
 import AsyncLock from 'async-lock';
 import chokidar from 'chokidar';
 import fs from 'fs-extra';
@@ -10,7 +11,6 @@ import {
   RePackArguments,
   RePackConfiguration
 } from 'etc/types';
-import { adeiu } from 'lib/cjs-interop';
 import log from 'lib/log';
 import { linkPackage } from 'lib/npm';
 import {
