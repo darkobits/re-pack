@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.9](https://github.com/darkobits/re-pack/compare/v1.0.8...v1.0.9) (2023-01-25)
+
+
+### 🏗 Chores
+
+* **deps:** Update dependencies. ([1248414](https://github.com/darkobits/re-pack/commit/1248414d5ba009bdfdd1225eb986a4805c763db1))
+
 ## [1.0.8](https://github.com/darkobits/re-pack/compare/v1.0.7...v1.0.8) (2023-01-20)
 
 
