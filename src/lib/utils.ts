@@ -1,7 +1,8 @@
 import path from 'path';
 
+import { interopImportDefault } from '@darkobits/interop-import-default';
 import fs from 'fs-extra';
-import ow from 'ow';
+import owExport from 'ow';
 import * as R from 'ramda';
 import readPackageUp, { NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
@@ -9,6 +10,9 @@ import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
+
+
+const ow: typeof owExport = interopImportDefault(owExport);
 
 
 export interface PkgInfo {
