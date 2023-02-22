@@ -36,7 +36,7 @@
     "tempy": "~1.0.1"
   },
   "devDependencies": {
-    "@darkobits/ts": "^0.14.12",
+    "@darkobits/ts": "^0.14.13",
     "@types/async-lock": "^1.4.0",
     "@types/fs-extra": "^11.0.1",
     "@types/npm-packlist": "^3.0.0",
