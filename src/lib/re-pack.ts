@@ -12,13 +12,57 @@ import {
   RePackConfiguration
 } from 'etc/types';
 import log from 'lib/log';
-import { linkPackage } from 'lib/npm';
+import {
+  getPackList,
+  linkPackage
+} from 'lib/npm';
 import {
   createPackDir,
   getPkgInfo,
-  packToPublishDir,
   rewritePackageJson
 } from 'lib/utils';
+
+
+/**
+ * Packs and the unpacks the host package's publishable files to the publish
+ * workspace using `npm pack`.
+ *
+ * Note: This function assumes the publish workspace has already been created.
+ */
+export interface PackToPublishDirOptions {
+  /**
+   * Root directory of the NPM package to re-pack.
+   */
+  pkgRoot: string;
+
+  /**
+   * Directory from which to hoist files to the root of the destination
+   * directory.
+   */
+  hoistDir: string;
+
+  /**
+   * Directory to write files to.
+   */
+  destDir: string;
+}
+
+
+export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPublishDirOptions) {
+  const srcFiles: Array<string> = await getPackList(pkgRoot);
+
+  await Promise.all(srcFiles.map(async srcFile => {
+    // Skip package.json, as we re-write it manually elsewhere.
+    if (path.basename(srcFile) === 'package.json') {
+      return;
+    }
+
+    const resolvedSrcFile = path.resolve(pkgRoot, srcFile);
+    const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''));
+    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`);
+    await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true });
+  }));
+}
 
 
 // ---- Re-Pack ----------------------------------------------------------------

@@ -9,7 +9,6 @@ import tempy from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
-import { getPackList } from 'lib/npm';
 
 
 export interface PkgInfo {
@@ -161,47 +160,6 @@ export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: Rewrite
   } catch (err: any) {
     throw new Error(`${log.prefix('rewritePackageJson')} Error re-writing package.json: ${err.message}`);
   }
-}
-
-
-/**
- * Packs and the unpacks the host package's publishable files to the publish
- * workspace using `npm pack`.
- *
- * Note: This function assumes the publish workspace has already been created.
- */
-export interface PackToPublishDirOptions {
-  /**
-   * Root directory of the NPM package to re-pack.
-   */
-  pkgRoot: string;
-
-  /**
-   * Directory from which to hoist files to the root of the destination
-   * directory.
-   */
-  hoistDir: string;
-
-  /**
-   * Directory to write files to.
-   */
-  destDir: string;
-}
-
-export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPublishDirOptions) {
-  const srcFiles: Array<string> = await getPackList(pkgRoot);
-
-  await Promise.all(srcFiles.map(async srcFile => {
-    // Skip package.json, as we re-write it manually elsewhere.
-    if (path.basename(srcFile) === 'package.json') {
-      return;
-    }
-
-    const resolvedSrcFile = path.resolve(pkgRoot, srcFile);
-    const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''));
-    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`);
-    await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true });
-  }));
 }
 
 
