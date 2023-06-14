@@ -185,6 +185,4 @@ cli.command({
 });
 
 
-cli.init(argv => {
-  argv.wrap(128);
-});
+cli.init();
