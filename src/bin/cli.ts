@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import adeiu from '@darkobits/adeiu';
-import cli from '@darkobits/saffron';
+import * as cli from '@darkobits/saffron';
 
 import {
   DEFAULT_OPTIONS,

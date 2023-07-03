@@ -35,5 +35,5 @@ jobs:
         run: npm clean-install
       - name: Build Project
         run: npx nr build
-      - name: Run Smoke Tests
-        run: npx nr smokeTest
+      - name: Run Tests
+        run: npx nr test.smoke
