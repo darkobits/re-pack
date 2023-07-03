@@ -15,6 +15,7 @@
   "bin": {
     "re-pack": "dist/bin/cli.js"
   },
+  "main": "dist/index.js",
   "scripts": {
     "prepare": "nr prepare",
     "help": "nr --scripts"
