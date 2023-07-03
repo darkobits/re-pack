@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.12](https://github.com/darkobits/re-pack/compare/v1.0.11...v1.0.12) (2023-07-03)
+
+
+### 🏗 Chores
+
+* **deps:** Update dependencies. ([13dbf08](https://github.com/darkobits/re-pack/commit/13dbf087a845460a8f77198384f6524bc7066473))
+* **deps:** Update dependencies. ([aca5137](https://github.com/darkobits/re-pack/commit/aca5137bec70feaea71aaf6a2acbb41e9f11173b))
+* **deps:** Update dependencies. ([25533af](https://github.com/darkobits/re-pack/commit/25533afd743024bbc3e58d5a539a0e003e5008d8))
+* Update LICENSE. ([5f49c7a](https://github.com/darkobits/re-pack/commit/5f49c7a485e8a4d62791da7a520c0eaa3b317d8d))
+
+
+### 🛠 Refactoring
+
+* Export configuration type. ([cf7f39c](https://github.com/darkobits/re-pack/commit/cf7f39c723417f64cd981316065e3fbbdda92a3b))
+
 ## [1.0.11](https://github.com/darkobits/re-pack/compare/v1.0.10...v1.0.11) (2023-02-22)
 
 
