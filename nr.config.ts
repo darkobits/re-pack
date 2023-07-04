@@ -1,20 +1,13 @@
-import { nr } from '@darkobits/ts';
+// import nr from '@darkobits/nr';
+import { nr as withDefaultPackageScripts } from '@darkobits/ts';
 
-export default nr(({ command, script }) => {
-  script('test.smoke', [
-    command.node('./dist/bin/cli.js')
-    // command('smoke-test-publish', ['node'
-    //   [require.resolve('./dist/bin/cli.js'),  'publish'], { dryRun: true}
-    // ], {})
-  ], {
+
+export default withDefaultPackageScripts(({ command, script }) => {
+  script('test.smoke', command.node('./dist/bin/cli.js'), {
     group: 'Testing',
-    description: 'Runs smoke tests.',
+    description: 'Run smoke tests.',
     timing: true
   });
 
-  script('postBuild', [
-    'script:test.smoke'
-  ], {
-    group: 'Lifecycle'
-  });
+  script('postBuild', 'script:test.smoke', { group: 'Lifecycle' });
 });
