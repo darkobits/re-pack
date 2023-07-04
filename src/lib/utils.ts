@@ -1,18 +1,14 @@
 import path from 'path';
 
-import { interopImportDefault } from '@darkobits/interop-import-default';
 import fs from 'fs-extra';
-import owExport from 'ow';
+import ow from 'ow';
 import * as R from 'ramda';
-import readPackageUp, { NormalizedPackageJson } from 'read-pkg-up';
+import { readPackageUp, type NormalizedPackageJson } from 'read-pkg-up';
 import semver from 'semver';
-import tempy from 'tempy';
+import { temporaryDirectory } from 'tempy';
 
 import { REWRITE_FIELDS } from 'etc/constants';
 import log from 'lib/log';
-
-
-const ow: typeof owExport = interopImportDefault(owExport);
 
 
 export interface PkgInfo {
@@ -24,7 +20,7 @@ export interface PkgInfo {
   /**
    * Root directory for the resolved package.
    */
-  rootDir: string;
+  root: string;
 }
 
 /**
@@ -39,10 +35,10 @@ export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> 
     throw new Error(`${log.prefix('getPkgInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`);
   }
 
-  const rootDir = path.dirname(pkgInfo.path);
+  const root = path.dirname(pkgInfo.path);
   const json = pkgInfo.packageJson;
 
-  return { json, rootDir };
+  return { json, root };
 }
 
 
@@ -68,7 +64,7 @@ export function isEmpty(value: any) {
  * Creates the directory to which the host package will be re-packed.
  */
 export async function createPackDir(workspacePath?: string) {
-  const resolvedPackDir = workspacePath ? path.resolve(workspacePath) : tempy.directory();
+  const resolvedPackDir = workspacePath ? path.resolve(workspacePath) : temporaryDirectory();
 
   // Ensure re-pack directory exists, creating any directories as-needed.
   try {
@@ -182,7 +178,7 @@ export function inferPublishTag(pkgVersion: string) {
 
 
 export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: PkgInfo) {
-  const pkgJsonPath = path.join(pkgInfo.rootDir, 'package.json');
+  const pkgJsonPath = path.join(pkgInfo.root, 'package.json');
 
   const clonedPackageJson = R.clone(pkgInfo.json);
 

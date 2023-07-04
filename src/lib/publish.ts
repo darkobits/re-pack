@@ -53,7 +53,7 @@ export default async function publish(userOptions: PublishArguments & RePackConf
     // Run the "prepublishOnly" script on the _root_ package.
     if (pkg.json.scripts?.prepublishOnly) {
       log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"prepublishOnly"')} lifecycle script.`);
-      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'prepublishOnly' });
+      await runLifecycleScript({ cwd: pkg.root, scriptName: 'prepublishOnly' });
     } else if (!config.get('hasSeenPrepublishWarning')) {
       // Issue a one-time warning about installing the publish guard.
       log.warn(log.prefix('publish'), `Consider adding a ${log.chalk.green('"prepublishOnly"')} package script that runs ${log.chalk.bold('re-pack guard')}.`);
@@ -64,7 +64,7 @@ export default async function publish(userOptions: PublishArguments & RePackConf
     // Run the "prepare" script on the _root_ package.
     if (pkg.json.scripts?.prepare) {
       log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"prepare"')} lifecycle script.`);
-      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'prepare' });
+      await runLifecycleScript({ cwd: pkg.root, scriptName: 'prepare' });
     }
 
     // Re-pack package.
@@ -83,7 +83,7 @@ export default async function publish(userOptions: PublishArguments & RePackConf
     // Run the "postpublish" script on the _root_ package.
     if (pkg.json.scripts?.postpublish) {
       log.verbose(log.prefix('publish'), `Running ${log.chalk.green('"postpublish"')} lifecycle script.`);
-      await runLifecycleScript({ cwd: pkg.rootDir, scriptName: 'postpublish' });
+      await runLifecycleScript({ cwd: pkg.root, scriptName: 'postpublish' });
     }
 
     log.info(log.prefix('publish'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));

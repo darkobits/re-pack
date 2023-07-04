@@ -1,4 +1,5 @@
 import chex from '@darkobits/chex';
+import Arborist from '@npmcli/arborist';
 import packlist from 'npm-packlist';
 
 import log from 'lib/log';
@@ -21,8 +22,10 @@ const npm = chex.sync('npm >=6.0.0');
 /**
  * Returns a list of files that should be packed by `npm pack`.
  */
-export async function getPackList(cwd: string) {
-  return packlist({ path: cwd });
+export async function getPackList(cwd: string): Promise<Array<string>> {
+  const arborist = new Arborist({ path: cwd });
+  const tree = await arborist.loadActual();
+  return packlist(tree);
 }
 
 

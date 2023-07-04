@@ -118,7 +118,7 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     // re-pack workspace, hoisting any files in the configured 'hoistDir' to the
     // workspace root.
     await packToPublishDir({
-      pkgRoot: pkg.rootDir,
+      pkgRoot: pkg.root,
       hoistDir: opts.hoistDir,
       destDir: resolvedPackDir
     });
@@ -155,12 +155,12 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     await lock.acquire('re-pack', preparePackage);
 
     const filesToWatch = [
-      path.resolve(pkg.rootDir, 'package.json'),
+      path.resolve(pkg.root, 'package.json'),
       resolvedHoistDir
     ];
 
     watcher = chokidar.watch(filesToWatch, {
-      // cwd: pkg.rootDir,
+      // cwd: pkg.root,
       ignoreInitial: true,
       // Ignore source-maps and declaration files.
       ignored: ['**/*.js.map', '**/*.d.ts'],

@@ -13,8 +13,10 @@ const schema = {
 };
 
 
-// @ts-expect-error - Typings are wonky for this package at the moment.
-const config = new Conf({ schema });
+const config = new Conf({
+  projectName: '@darkobits/re-pack',
+  schema
+});
 
 
 export default config;
