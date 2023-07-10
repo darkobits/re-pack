@@ -45,10 +45,7 @@ export default async function publish(userOptions: PublishArguments & RePackConf
 
     // Compute dist-tag.
     const tag = opts.tag ?? inferPublishTag(pkg.json.version);
-
-    if (tag) {
-      log.info(log.prefix('publish'), `Using dist-tag: ${log.chalk.yellow(tag)}`);
-    }
+    if (tag) log.info(log.prefix('publish'), `Using dist-tag: ${log.chalk.yellow(tag)}`);
 
     // Run the "prepublishOnly" script on the _root_ package.
     if (pkg.json.scripts?.prepublishOnly) {
@@ -78,7 +75,11 @@ export default async function publish(userOptions: PublishArguments & RePackConf
     });
 
     // Publish re-packed package.
-    await publishPackage({ cwd: opts.packDir, dryRun: opts.dryRun, tag });
+    await publishPackage({
+      cwd: opts.packDir,
+      dryRun: opts.dryRun,
+      tag
+    });
 
     // Run the "postpublish" script on the _root_ package.
     if (pkg.json.scripts?.postpublish) {

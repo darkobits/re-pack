@@ -31,9 +31,9 @@ export interface PkgInfo {
 export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> {
   const pkgInfo = await readPackageUp({ cwd });
 
-  if (!pkgInfo) {
-    throw new Error(`${log.prefix('getPkgInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`);
-  }
+  if (!pkgInfo) throw new Error(
+    `${log.prefix('getPkgInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`
+  );
 
   const root = path.dirname(pkgInfo.path);
   const json = pkgInfo.packageJson;
@@ -46,15 +46,11 @@ export async function getPkgInfo(cwd: string = process.cwd()): Promise<PkgInfo> 
  * Determines the "emptiness" of various data structures.
  */
 export function isEmpty(value: any) {
-  if (ow.isValid(value, ow.array)) {
-    // If none of the elements in the array are truthy, consider it "empty".
-    return R.none<any>(R.identity, value);
-  }
+  // If none of the elements in the array are truthy, consider it "empty".
+  if (ow.isValid(value, ow.array)) return R.none<any>(R.identity, value);
 
-  if (ow.isValid(value, ow.object)) {
-    // If none of the object's values are truthy, consider it "empty".
-    return R.none<any>(R.identity, R.values(value));
-  }
+  // If none of the object's values are truthy, consider it "empty".
+  if (ow.isValid(value, ow.object)) return R.none<any>(R.identity, R.values(value));
 
   return R.isEmpty(value);
 }
@@ -116,20 +112,14 @@ export interface RewritePackageJsonOptions {
 export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: RewritePackageJsonOptions) {
   const rewriteField = (value: string) => {
     const relativePath = path.relative(hoistDir, value);
-
-    if (relativePath) {
-      return `./${path.relative(hoistDir, value)}`;
-    }
-
+    if (relativePath) return `./${path.relative(hoistDir, value)}`;
     return relativePath;
   };
 
   try {
     // @ts-expect-error
     const newPkgJson = R.reduce((acc, curField) => {
-      if (!R.has(curField, acc)) {
-        return acc;
-      }
+      if (!R.has(curField, acc)) return acc;
 
       const curValue = pkgJson[curField];
       let newValue: typeof curValue;
@@ -179,7 +169,6 @@ export function inferPublishTag(pkgVersion: string) {
 
 export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: PkgInfo) {
   const pkgJsonPath = path.join(pkgInfo.root, 'package.json');
-
   const clonedPackageJson = R.clone(pkgInfo.json);
 
   // Remove "prepare" script if it is present.

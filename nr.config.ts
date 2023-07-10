@@ -1,6 +1,4 @@
-// import nr from '@darkobits/nr';
-import { nr as withDefaultPackageScripts } from '@darkobits/ts';
-
+import { withDefaultPackageScripts } from '@darkobits/ts';
 
 export default withDefaultPackageScripts(({ command, script }) => {
   script('test.smoke', command.node('./dist/bin/cli.js'), {

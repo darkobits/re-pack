@@ -100,14 +100,8 @@ export async function publishPackage({ cwd, tag, dryRun }: PublishOptions) {
   const pkgInfo = await getPkgInfo(cwd);
 
   const args = ['publish', '--ignore-scripts'];
-
-  if (dryRun) {
-    args.push('--dry-run');
-  }
-
-  if (tag) {
-    args.push(`--tag=${tag}`);
-  }
+  if (dryRun) args.push('--dry-run');
+  if (tag) args.push(`--tag=${tag}`);
 
   log.verbose(log.prefix('publishPackage'), `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`);
 

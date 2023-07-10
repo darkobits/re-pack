@@ -101,11 +101,9 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
   const preparePackage = async () => {
     log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`);
 
-    if (opts.watch) {
-      // If in watch mode, re-read package.json to ensure we pick up changes.
-      // eslint-disable-next-line require-atomic-updates
-      pkg = await getPkgInfo(resolvedCwd);
-    }
+    // If in watch mode, re-read package.json to ensure we pick up changes.
+    // eslint-disable-next-line require-atomic-updates
+    if (opts.watch) pkg = await getPkgInfo(resolvedCwd);
 
     // Create a new package.json and write it to the publish workspace.
     await rewritePackageJson({

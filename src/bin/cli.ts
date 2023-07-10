@@ -30,10 +30,7 @@ const DESCRIPTIONS = {
 cli.command<Required<RePackArguments>, RePackConfiguration>({
   command: '* [cwd]',
   description: 'Re-pack the host package.',
-  config: {
-    fileName: 're-pack',
-    auto: false
-  },
+  config: { auto: false },
   builder: ({ command }) => {
     command.positional('cwd', {
       description: 'Root directory of the package to re-pack. [default: cwd]',
@@ -99,10 +96,7 @@ cli.command<Required<RePackArguments>, RePackConfiguration>({
 cli.command<Required<PublishArguments>, RePackConfiguration>({
   command: 'publish',
   description: 'Re-pack and publish the host package.',
-  config: {
-    fileName: 're-pack',
-    auto: false
-  },
+  config: { auto: false },
   builder: ({ command }) => {
     command.positional('cwd', {
       description: 'Root directory of the package to re-pack and publish. [default: cwd]',
@@ -146,8 +140,6 @@ cli.command<Required<PublishArguments>, RePackConfiguration>({
       required: false,
       default: DEFAULT_PUBLISH_OPTIONS.dryRun
     });
-
-    // command.wrap(128);
   },
   handler: async ({ argv, config }) => {
     try {
@@ -167,11 +159,7 @@ cli.command<Required<PublishArguments>, RePackConfiguration>({
 
 cli.command({
   command: 'guard',
-  config: {
-    // TODO: Update saffron to make this optional.
-    fileName: 're-pack',
-    auto: false
-  },
+  config: { auto: false },
   description: 'Guards against accidental invocations of `npm publish`. This command should be run as a "prepublishOnly" script.',
   handler: () => {
     try {
