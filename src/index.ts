@@ -1,1 +1,1 @@
-export type { RePackConfiguration } from 'etc/types';
+export type { RePackConfiguration } from 'etc/types'

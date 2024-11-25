@@ -1,5 +1,4 @@
-import Conf from 'conf';
-
+import Conf from 'conf'
 
 const schema = {
   isPublishing: {
@@ -10,13 +9,11 @@ const schema = {
     type: 'boolean',
     default: false
   }
-};
-
+}
 
 const config = new Conf({
   projectName: '@darkobits/re-pack',
   schema
-});
+})
 
-
-export default config;
+export default config

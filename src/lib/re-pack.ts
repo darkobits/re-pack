@@ -1,27 +1,26 @@
-import path from 'path';
+import path from 'path'
 
-import adeiu from '@darkobits/adeiu';
-import AsyncLock from 'async-lock';
-import chokidar from 'chokidar';
-import fs from 'fs-extra';
-import * as R from 'ramda';
+import adeiu from '@darkobits/adeiu'
+import AsyncLock from 'async-lock'
+import chokidar, { type FSWatcher } from 'chokidar'
+import fs from 'fs-extra'
+import * as R from 'ramda'
 
-import { DEFAULT_OPTIONS } from 'etc/constants';
+import { DEFAULT_OPTIONS } from 'etc/constants'
 import {
   RePackArguments,
   RePackConfiguration
-} from 'etc/types';
-import log from 'lib/log';
+} from 'etc/types'
+import log from 'lib/log'
 import {
   getPackList,
   linkPackage
-} from 'lib/npm';
+} from 'lib/npm'
 import {
   createPackDir,
-  getPkgInfo,
+  getPackageInfo,
   rewritePackageJson
-} from 'lib/utils';
-
+} from 'lib/utils'
 
 /**
  * Packs and the unpacks the host package's publishable files to the publish
@@ -33,37 +32,35 @@ export interface PackToPublishDirOptions {
   /**
    * Root directory of the NPM package to re-pack.
    */
-  pkgRoot: string;
+  pkgRoot: string
 
   /**
    * Directory from which to hoist files to the root of the destination
    * directory.
    */
-  hoistDir: string;
+  hoistDir: string
 
   /**
    * Directory to write files to.
    */
-  destDir: string;
+  destDir: string
 }
 
-
 export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPublishDirOptions) {
-  const srcFiles: Array<string> = await getPackList(pkgRoot);
+  const srcFiles: Array<string> = await getPackList(pkgRoot)
 
   await Promise.all(srcFiles.map(async srcFile => {
     // Skip package.json, as we re-write it manually elsewhere.
     if (path.basename(srcFile) === 'package.json') {
-      return;
+      return
     }
 
-    const resolvedSrcFile = path.resolve(pkgRoot, srcFile);
-    const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''));
-    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`);
-    await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true });
-  }));
+    const resolvedSrcFile = path.resolve(pkgRoot, srcFile)
+    const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''))
+    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`)
+    await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true })
+  }))
 }
-
 
 // ---- Re-Pack ----------------------------------------------------------------
 
@@ -72,45 +69,44 @@ export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPub
  * provided configuration.
  */
 export default async function rePack(userOptions: RePackArguments & RePackConfiguration) {
-  const runTime = log.createTimer();
+  const runTime = log.createTimer()
 
   // Merge options with defaults.
-  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments> & RePackConfiguration;
+  const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments> & RePackConfiguration
 
   // Compute the absolute path to our working directory.
-  const resolvedCwd = path.resolve(opts.cwd);
-  log.verbose(log.prefix('pack'), `cwd: ${log.chalk.green(resolvedCwd)}`);
+  const resolvedCwd = path.resolve(opts.cwd)
+  log.verbose(log.prefix('pack'), `cwd: ${log.chalk.green(resolvedCwd)}`)
 
   // Compute the absolute path to our source directory.
-  const resolvedHoistDir = path.resolve(opts.hoistDir);
+  const resolvedHoistDir = path.resolve(opts.hoistDir)
 
   // eslint-disable-next-line prefer-const
   let [pkg, resolvedPackDir] = await Promise.all([
     // Gather information about the host package.
-    getPkgInfo(resolvedCwd),
+    getPackageInfo(resolvedCwd),
     // Compute the absolute path to the publish workspace, create the
     // directory if needed, and ensure it is empty.
     createPackDir(opts.packDir)
-  ]);
-
+  ])
 
   // ----- Prepare Package -----------------------------------------------------
 
-  let hasLinkedPackage = false;
+  let hasLinkedPackage = false
 
   const preparePackage = async () => {
-    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`);
+    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`)
 
     // If in watch mode, re-read package.json to ensure we pick up changes.
     // eslint-disable-next-line require-atomic-updates
-    if (opts.watch) pkg = await getPkgInfo(resolvedCwd);
+    if (opts.watch) pkg = await getPackageInfo(resolvedCwd)
 
     // Create a new package.json and write it to the publish workspace.
     await rewritePackageJson({
       pkgJson: pkg.json,
       hoistDir: opts.hoistDir,
       packDir: resolvedPackDir
-    });
+    })
 
     // Copy all files that would be included in the package's tarball to the
     // re-pack workspace, hoisting any files in the configured 'hoistDir' to the
@@ -119,43 +115,42 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
       pkgRoot: pkg.root,
       hoistDir: opts.hoistDir,
       destDir: resolvedPackDir
-    });
+    })
 
     if (typeof opts.afterRepack === 'function') {
-      log.verbose(log.prefix('pack'), 'Running afterRepack function.');
+      log.verbose(log.prefix('pack'), 'Running afterRepack function.')
 
       try {
-        await opts.afterRepack({ fs, packDir: resolvedPackDir });
+        await opts.afterRepack({ fs, packDir: resolvedPackDir })
       } catch (err: any) {
-        err.message = `${log.prefix('afterRepack')} ${err.message}`;
-        throw err;
+        err.message = `${log.prefix('afterRepack')} ${err.message}`
+        throw err
       }
     }
 
     // Once the package is re-packed, perform a one-time `npm link` if the user
     // passed the --link option.
     if (opts.link && !hasLinkedPackage) {
-      await linkPackage(resolvedPackDir);
+      await linkPackage(resolvedPackDir)
       // eslint-disable-next-line require-atomic-updates
-      hasLinkedPackage = true;
+      hasLinkedPackage = true
     }
-  };
-
+  }
 
   // ----- Watching ------------------------------------------------------------
 
-  let watcher: chokidar.FSWatcher;
+  let watcher: FSWatcher
 
   if (opts.watch) {
-    const lock = new AsyncLock();
+    const lock = new AsyncLock()
 
     // Begin initial link & re-pack.
-    await lock.acquire('re-pack', preparePackage);
+    await lock.acquire('re-pack', preparePackage)
 
     const filesToWatch = [
       path.resolve(pkg.root, 'package.json'),
       resolvedHoistDir
-    ];
+    ]
 
     watcher = chokidar.watch(filesToWatch, {
       // cwd: pkg.root,
@@ -163,19 +158,19 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
       // Ignore source-maps and declaration files.
       ignored: ['**/*.js.map', '**/*.d.ts'],
       interval: 250
-    });
+    })
 
     watcher.on('ready', () => {
-      log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedHoistDir)}`);
-    });
+      log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedHoistDir)}`)
+    })
 
     watcher.on('all', (event, changed) => {
-      log.info(log.prefix('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`);
-      void lock.acquire('re-pack', preparePackage);
-    });
+      log.info(log.prefix('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`)
+      void lock.acquire('re-pack', preparePackage)
+    })
   } else {
     // Perform a one-time repack only.
-    await preparePackage();
+    await preparePackage()
   }
 
   // ----- Compute Return Value ------------------------------------------------
@@ -185,16 +180,16 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     // then exit.
     if (opts.watch) {
       adeiu(async () => {
-        await watcher.close();
-        resolve(resolvedPackDir);
-      });
+        await watcher.close()
+        resolve(resolvedPackDir)
+      })
 
-      return;
+      return
     }
 
     // Otherwise, log the total run time.
-    log.info(log.prefix('pack'), `=> ${log.chalk.gray(resolvedPackDir)}`);
-    log.info(log.prefix('pack'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`));
-    resolve(resolvedPackDir);
-  });
+    log.info(log.prefix('pack'), `=> ${log.chalk.gray(resolvedPackDir)}`)
+    log.info(log.prefix('pack'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`))
+    resolve(resolvedPackDir)
+  })
 }

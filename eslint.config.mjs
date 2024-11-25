@@ -1,1 +1,1 @@
-export { ts as default } from '@darkobits/eslint-plugin';
+export { ts as default } from '@darkobits/eslint-plugin'

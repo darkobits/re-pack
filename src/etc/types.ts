@@ -1,26 +1,23 @@
-import type * as fs from 'fs-extra';
-
+import type * as fs from 'fs-extra'
 
 export interface AfterRepackParams {
   /**
    * Reference to the fs-extra package.
    */
-  fs: typeof fs;
+  fs: typeof fs
 
   /**
    * Absolute path to the re-pack directory.
    */
-  packDir: string;
+  packDir: string
 }
-
 
 /**
  * Options allowed in re-pack configuration files.
  */
 export interface RePackConfiguration {
-  afterRepack?: ((params: AfterRepackParams) => void | Promise<void>) | undefined;
+  afterRepack?: ((params: AfterRepackParams) => void | Promise<void>) | undefined
 }
-
 
 /**
  * Arguments/options for the root command.
@@ -31,7 +28,7 @@ export interface RePackArguments {
    *
    * Default: process.cwd()
    */
-  cwd: string;
+  cwd: string
 
   /**
    * Sub-directory in the host package (typically containing build artifacts) to
@@ -39,30 +36,29 @@ export interface RePackArguments {
    *
    * Default: 'dist'
    */
-  hoistDir: string;
+  hoistDir: string
 
   /**
    * (Optional) Directory where re-pack will stage files to be published.
    *
    * Default: .re-pack
    */
-  packDir: string;
+  packDir: string
 
   /**
    * If true, continuously watches `hoistDir` and re-packs to `outDir`.
    *
    * Default: false
    */
-  watch?: boolean | undefined;
+  watch?: boolean | undefined
 
   /**
    * If true, runs `npm link` after re-packing.
    *
    * Default: false
    */
-  link?: boolean | undefined;
+  link?: boolean | undefined
 }
-
 
 /**
  * Arguments/options for the `publish` sub-command.
@@ -73,7 +69,7 @@ export interface PublishArguments {
    *
    * Default: process.cwd()
    */
-  cwd: string;
+  cwd: string
 
   /**
    * Sub-directory in the host package (typically containing build artifacts) to
@@ -81,21 +77,21 @@ export interface PublishArguments {
    *
    * Default: 'dist'
    */
-  hoistDir: string;
+  hoistDir: string
 
   /**
    * (Optional) Directory where re-pack will stage files to be published.
    *
    * Default: .re-pack
    */
-  packDir: string;
+  packDir: string
 
   /**
    * Passes the --dry-run flag to `npm publish`.
    *
    * Default: false
    */
-  dryRun?: boolean | undefined;
+  dryRun?: boolean | undefined
 
   /**
    * Optional access to set on the published package. Forwards to the --access
@@ -103,7 +99,7 @@ export interface PublishArguments {
    *
    * Default: N/A
    */
-  access?: string | undefined;
+  access?: string | undefined
 
   /**
    * Optional dist-tag to publish the package under. Forwards to the --tag
@@ -111,5 +107,5 @@ export interface PublishArguments {
    *
    * Default: N/A
    */
-  tag?: string | undefined;
+  tag?: string | undefined
 }
