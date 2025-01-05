@@ -36,8 +36,9 @@ export async function getPackList(cwd: string): Promise<Array<string>> {
  */
 export async function linkPackage(cwd: string) {
   const pkgInfo = await getPackageInfo(cwd)
+  const prefix = log.chalk.cyan.dim('link')
 
-  log.info(log.prefix('link'), `${log.chalk.bold('Linking package:')} ${log.chalk.green(pkgInfo.json.name)}`)
+  log.info(prefix, `${log.chalk.bold('Linking package:')} ${log.chalk.green(pkgInfo.json.name)}`)
 
   const restorePackageJson = await temporarilyRemoveProblematicPackageScripts(pkgInfo)
 
@@ -48,7 +49,7 @@ export async function linkPackage(cwd: string) {
 
   await restorePackageJson()
 
-  log.info(log.prefix('link'), log.chalk.bold('Done.'))
+  log.info(prefix, log.chalk.bold('Done.'))
 }
 
 // ----- Lifecycles ------------------------------------------------------------
@@ -63,8 +64,9 @@ export interface RunLifecycleScriptOptions {
  */
 export async function runLifecycleScript(opts: RunLifecycleScriptOptions) {
   const args = ['run', opts.scriptName]
+  const prefix = log.chalk.cyan.dim(opts.scriptName)
 
-  log.verbose(log.prefix(opts.scriptName), `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`)
+  log.verbose(prefix, `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`)
 
   await npm(args, {
     cwd: opts.cwd,
@@ -98,7 +100,7 @@ export async function publishPackage({ cwd, tag, dryRun }: PublishOptions) {
   if (dryRun) args.push('--dry-run')
   if (tag) args.push(`--tag=${tag}`)
 
-  log.verbose(log.prefix('publishPackage'), `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`)
+  log.verbose(log.chalk.cyan.dim('publishPackage'), `Running ${log.chalk.bold(`\`npm ${args.join(' ')}\``)}.`)
 
   const restorePackageJson = await temporarilyRemoveProblematicPackageScripts(pkgInfo)
 

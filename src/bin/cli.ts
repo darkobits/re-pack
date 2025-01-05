@@ -64,10 +64,12 @@ cli.command<Required<RePackArguments>, RePackConfiguration>({
     })
   },
   handler: async ({ argv, config, configPath }) => {
+    const prefix = log.chalk.cyan.dim('config')
+
     try {
       if (configPath) {
-        log.verbose(log.prefix('config'), `Loaded configuration from: ${log.chalk.green(configPath)}`)
-        log.silly(log.prefix('config'), config)
+        log.debug(prefix, `Loaded configuration from: ${log.chalk.green(configPath)}`)
+        log.debug(prefix, config)
       }
 
       adeiu(signal => {

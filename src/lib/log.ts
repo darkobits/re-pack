@@ -1,3 +1,3 @@
-import LogFactory from '@darkobits/log'
+import { createLogger } from '@darkobits/log'
 
-export default LogFactory({ heading: 're-pack' })
+export default createLogger({ heading: 're-pack' })

@@ -7,10 +7,11 @@ import log from 'lib/log'
  */
 export default function publishGuard() {
   const isPublishing = config.get('isPublishing') as boolean
+  const prefix = log.chalk.cyan.dim('guard')
 
   if (isPublishing) {
-    log.verbose(log.prefix('guard'), 'Okay to publish!')
+    log.verbose(prefix, 'Okay to publish!')
   } else {
-    throw new Error(`${log.prefix('guard')} This package should be published using "re-pack publish".`)
+    throw new Error(`${prefix} This package should be published using "re-pack publish".`)
   }
 }

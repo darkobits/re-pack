@@ -31,7 +31,7 @@ export async function getPackageInfo(cwd: string = process.cwd()): Promise<Packa
   const pkgInfo = await readPackageUp({ cwd })
 
   if (!pkgInfo) throw new Error(
-    `${log.prefix('getPackageInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`
+    `${log.chalk.magenta('getPackageInfo')} Unable to locate package root from: ${log.chalk.green(cwd)}`
   )
 
   const root = path.dirname(pkgInfo.path)
@@ -63,7 +63,7 @@ export async function createPackDir(workspacePath?: string) {
   try {
     await fs.ensureDir(resolvedPackDir)
   } catch (err: any) {
-    err.message = `${log.prefix('createPackDir')} Unable to create re-pack directory: ${err.message}`
+    err.message = `${log.chalk.magenta('createPackDir')} Unable to create re-pack directory: ${err.message}`
     throw err
   }
 
@@ -71,11 +71,11 @@ export async function createPackDir(workspacePath?: string) {
   try {
     await fs.emptyDir(resolvedPackDir)
   } catch (err: any) {
-    err.message = `${log.prefix('createPackDir')} Unable to ensure publish workspace is empty: ${err.message}`
+    err.message = `${log.chalk.magenta('createPackDir')} Unable to ensure publish workspace is empty: ${err.message}`
     throw err
   }
 
-  log.verbose(log.prefix('createPackDir'), `Created re-pack directory: ${log.chalk.green(resolvedPackDir)}`)
+  log.verbose(log.chalk.magenta('createPackDir'), `Created re-pack directory: ${log.chalk.green(resolvedPackDir)}`)
 
   return resolvedPackDir
 }
@@ -133,7 +133,7 @@ export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: Rewrite
       // If the field winds up being an empty object, empty array, or an empty
       // string, omit it from the re-written package.json.
       if (isEmpty(newValue)) {
-        log.verbose(log.prefix('rewritePackageJson'), `Omitting empty/superfluous field: ${log.chalk.yellow(curField)}.`)
+        log.verbose(log.chalk.magenta('rewritePackageJson'), `Omitting empty/superfluous field: ${log.chalk.yellow(curField)}.`)
         return R.dissoc(curField, acc)
       }
 
@@ -142,9 +142,9 @@ export async function rewritePackageJson({ pkgJson, hoistDir, packDir }: Rewrite
 
     // Write the new package.json to the publish workspace.
     await fs.writeJson(path.resolve(packDir, 'package.json'), newPkgJson, { spaces: 2 })
-    log.verbose(log.prefix('rewritePackageJson'), `Wrote ${log.chalk.green('package.json')} to publish workspace.`)
+    log.verbose(log.chalk.magenta('rewritePackageJson'), `Wrote ${log.chalk.green('package.json')} to publish workspace.`)
   } catch (err: any) {
-    throw new Error(`${log.prefix('rewritePackageJson')} Error re-writing package.json: ${err.message}`)
+    throw new Error(`${log.chalk.magenta('rewritePackageJson')} Error re-writing package.json: ${err.message}`)
   }
 }
 
@@ -169,7 +169,7 @@ export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: Packag
   const prepareScript = R.path<string>(['scripts', 'prepare'], clonedPackageJson)
 
   if (prepareScript && clonedPackageJson.scripts) {
-    log.warn(log.prefix('link'), `Blocking invocation of prepare script: ${log.chalk.green(`"${prepareScript}"`)}`)
+    log.warn(log.chalk.magenta('link'), `Blocking invocation of prepare script: ${log.chalk.green(`"${prepareScript}"`)}`)
     Reflect.deleteProperty(clonedPackageJson.scripts, 'prepare')
   }
 
@@ -177,7 +177,7 @@ export async function temporarilyRemoveProblematicPackageScripts(pkgInfo: Packag
   const prepublishOnlyScript = R.path<string>(['scripts', 'prepublishOnly'], clonedPackageJson)
 
   if (prepublishOnlyScript && clonedPackageJson.scripts) {
-    log.warn(log.prefix('link'), `Blocking invocation of prepublishOnly script: ${log.chalk.green(`"${prepublishOnlyScript}"`)}`)
+    log.warn(log.chalk.magenta('link'), `Blocking invocation of prepublishOnly script: ${log.chalk.green(`"${prepublishOnlyScript}"`)}`)
     Reflect.deleteProperty(clonedPackageJson.scripts, 'prepublishOnly')
   }
 

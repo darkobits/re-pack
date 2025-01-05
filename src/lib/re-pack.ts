@@ -57,7 +57,7 @@ export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPub
 
     const resolvedSrcFile = path.resolve(pkgRoot, srcFile)
     const resolvedDestFile = path.resolve(destDir, srcFile.replace(new RegExp(`^${hoistDir}${path.sep}`), ''))
-    log.silly(log.prefix('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`)
+    log.trace(log.chalk.cyan.dim('packToPublishDir'), `Copy ${log.chalk.green(resolvedSrcFile)} => ${log.chalk.green(resolvedDestFile)}`)
     await fs.copy(resolvedSrcFile, resolvedDestFile, { overwrite: true })
   }))
 }
@@ -69,14 +69,15 @@ export async function packToPublishDir({ pkgRoot, hoistDir, destDir }: PackToPub
  * provided configuration.
  */
 export default async function rePack(userOptions: RePackArguments & RePackConfiguration) {
-  const runTime = log.createTimer()
+  const runTime = log.chronograph()
+  const prefix = log.chalk.cyan.dim('pack')
 
   // Merge options with defaults.
   const opts = R.mergeAll([DEFAULT_OPTIONS, userOptions]) as Required<RePackArguments> & RePackConfiguration
 
   // Compute the absolute path to our working directory.
   const resolvedCwd = path.resolve(opts.cwd)
-  log.verbose(log.prefix('pack'), `cwd: ${log.chalk.green(resolvedCwd)}`)
+  log.verbose(prefix, `cwd: ${log.chalk.green(resolvedCwd)}`)
 
   // Compute the absolute path to our source directory.
   const resolvedHoistDir = path.resolve(opts.hoistDir)
@@ -95,7 +96,7 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
   let hasLinkedPackage = false
 
   const preparePackage = async () => {
-    log.info(log.prefix('pack'), `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`)
+    log.info(prefix, `${log.chalk.bold('Re-packing:')} ${log.chalk.green(pkg.json.name)}`)
 
     // If in watch mode, re-read package.json to ensure we pick up changes.
     // eslint-disable-next-line require-atomic-updates
@@ -118,12 +119,10 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     })
 
     if (typeof opts.afterRepack === 'function') {
-      log.verbose(log.prefix('pack'), 'Running afterRepack function.')
-
       try {
         await opts.afterRepack({ fs, packDir: resolvedPackDir })
       } catch (err: any) {
-        err.message = `${log.prefix('afterRepack')} ${err.message}`
+        err.message = `${prefix} ${err.message}`
         throw err
       }
     }
@@ -161,11 +160,11 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     })
 
     watcher.on('ready', () => {
-      log.info(log.prefix('watch'), `Watching directory: ${log.chalk.green(resolvedHoistDir)}`)
+      log.info(log.chalk.cyan.dim('watch'), `Watching directory: ${log.chalk.green(resolvedHoistDir)}`)
     })
 
     watcher.on('all', (event, changed) => {
-      log.info(log.prefix('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`)
+      log.info(log.chalk.cyan.dim('watch'), `${log.chalk.gray(`${event}:`)} ${log.chalk.green(changed)}`)
       void lock.acquire('re-pack', preparePackage)
     })
   } else {
@@ -188,8 +187,8 @@ export default async function rePack(userOptions: RePackArguments & RePackConfig
     }
 
     // Otherwise, log the total run time.
-    log.info(log.prefix('pack'), `=> ${log.chalk.gray(resolvedPackDir)}`)
-    log.info(log.prefix('pack'), log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`))
+    log.info(prefix, `=> ${log.chalk.gray(resolvedPackDir)}`)
+    log.info(prefix, log.chalk.bold(`Done in ${log.chalk.yellow(runTime)}.`))
     resolve(resolvedPackDir)
   })
 }
